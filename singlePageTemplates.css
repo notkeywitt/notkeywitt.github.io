@@ -74,8 +74,8 @@ ul li:hover a {
 /* Hero Section */
 .hero {
 	background-color: #B3B1B2;
-	padding-top: 150px;
-	padding-bottom: 150px;
+	padding-top: 50px;
+	padding-bottom: 70px;
 }
 .light {
 	font-weight: bold;
