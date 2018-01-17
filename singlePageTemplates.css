@@ -2,7 +2,7 @@
 /* Body */
 body {
 	font-family: source-sans-pro;
-	background-color: white);
+	background-color: white;
 	margin-top: 0px;
 	margin-right: 0px;
 	margin-bottom: 0px;
@@ -38,7 +38,7 @@ header {
 nav {
 	float: right;
 	width: 50%;
-	text-align: right;
+	text-align: left;
 	margin-right: 25px;
 }
 header nav ul {
@@ -46,7 +46,7 @@ header nav ul {
 	float: right;
 }
 nav ul li {
-	float: left;
+	float: right;
 	color: #FFFFFF;
 	font-size: 14px;
 	text-align: left;
@@ -209,6 +209,16 @@ footer .footer_column p {
 	margin-left: auto;
 	margin-right: auto;
 	horizontal-align: center;
+}
+a:link, a:visited {
+    color: white;
+    padding: 14px 25px;
+    text-align: center; 
+    text-decoration: none;
+    display: inline-block;
+}
+a:hover, a:active {
+    background-color: red;
 }
 .button {
 	width: 200px;
