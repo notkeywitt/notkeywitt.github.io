@@ -178,13 +178,13 @@ ul li:hover a {
 /* More info */
 footer {
 	background-color: #FFFFFF;
-	padding-bottom: 35px;
+	padding-bottom: 5px;
 }
 .footer_column {
 	width: 50%;
 	text-align: center;
 	padding-top: 30px;
-	float: left;
+	float: right;
 }
 footer .footer_column h3 {
 	color: #B3B3B3;
@@ -201,13 +201,13 @@ footer .footer_column p {
 	max-height: 200px;
 }
 footer .footer_column p {
-	padding-left: 30px;
-	padding-right: 30px;
+	padding-left: auto;
+	padding-right: auto;
 	text-align: justify;
 	line-height: 25px;
 	font-weight: lighter;
-	margin-left: 20px;
-	margin-right: 20px;
+	margin-left: auto;
+	margin-right: auto;
 }
 .button {
 	width: 200px;
