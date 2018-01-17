@@ -247,8 +247,8 @@ footer .footer_column p {
 }
 .footer_banner {
 	background-color: #B3B3B3;
-	padding-top: 60px;
-	padding-bottom: 60PX;
+	padding-top: 0px;
+	padding-bottom: 0PX;
 	margin-bottom: 0px;
 	background-image: url(file:///Macintosh%20HD/Users/arsearson/Documents/keillorwitt/images/pattern.png);
 	background-repeat: repeat;
@@ -366,7 +366,7 @@ nav ul li {
 	float: none;
 	overflow: auto;
 	display: inline-block;
-	background: #52bad5;
+	background: #bebebe;
 }
 header nav ul {
 	padding: 0px;
