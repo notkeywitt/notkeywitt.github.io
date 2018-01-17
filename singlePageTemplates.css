@@ -73,7 +73,7 @@ ul li:hover a {
 }
 /* Hero Section */
 .hero {
-	background-imgage: url("kwbkg1.gif");
+	background-img: <img src="/kwbkg1.gif">;
 	padding-top: 150px;
 	padding-bottom: 150px;
 }
