@@ -2,7 +2,7 @@
 /* Body */
 body {
 	font-family: source-sans-pro;
-	background-color: #f2f2f2;
+	background-color: white);
 	margin-top: 0px;
 	margin-right: 0px;
 	margin-bottom: 0px;
@@ -196,7 +196,7 @@ footer .footer_column p {
 }
 .cards {
 	width: 100%;
-	height: auto;
+	height: 100%;
 	max-width: 400px;
 	max-height: 200px;
 }
@@ -208,6 +208,7 @@ footer .footer_column p {
 	font-weight: lighter;
 	margin-left: auto;
 	margin-right: auto;
+	horizontal-align: center;
 }
 .button {
 	width: 200px;
@@ -225,7 +226,7 @@ footer .footer_column p {
 	text-transform: uppercase;
 	font-weight: bold;
 	letter-spacing: 2px;
-	border: 3px solid #FFFFFF;
+	border: 30px solid #FFFFFF;
 	color: #FFFFFF;
 	transition: all 0.3s linear;
 }
@@ -247,8 +248,8 @@ footer .footer_column p {
 }
 .footer_banner {
 	background-color: #B3B3B3;
-	padding-top: 0px;
-	padding-bottom: 0PX;
+	padding-top: 10px;
+	padding-bottom: 100PX;
 	margin-bottom: 0px;
 	background-image: url(file:///Macintosh%20HD/Users/arsearson/Documents/keillorwitt/images/pattern.png);
 	background-repeat: repeat;
