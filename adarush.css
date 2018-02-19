@@ -28,6 +28,8 @@ header {
 	background-color: #FFFFFF;
 	border-bottom: 5px solid #B3B1b6;
 	list-style-type: none;
+		font-weight: bold;
+	font-color: #464646;
 }
 .button2 {
 	width: 10%;
@@ -59,19 +61,21 @@ header {
 	cursor: pointer;
 }
 .hero_header {
-	color: #ffffff;
+	color: #000000;
 	text-align: center;
 	margin-top: 0px;
 	margin-right: 0px;
 	margin-bottom: 0px;
 	margin-left: 0px;
 	letter-spacing: 4px;
+
 }
 
 .hero {
-	background-color: #B3B1B2;
+	background-color: #ffffff;
 	padding-top: 30px;
 	padding-bottom: 40px;
+
 }
 
 .light {
