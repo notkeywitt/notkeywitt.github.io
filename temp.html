@@ -1,51 +1,35 @@
 <!doctype html>
 <html>
-  <head>
-  
-<script src="https://code.jquery.com/jquery-1.12.4.min.js"
-        integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ"
-        crossorigin="anonymous">
-</script>
-<script src="src/jquery.csv.js"></script>
 
-	  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
-		
-      google.charts.setOnLoadCallback(drawChart);
+<head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="jquery.csv-0.71.js"></script>
+	<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
 
-      function drawChart() {
-   //     var data = google.visualization.arrayToDataTable([
-   //       ['Year', 'Sales', 'Expenses'],
-   //       ['2004',  1000,      400],
-   //       ['2005',  1170,      460],
-  //        ['2006',  660,       1120],
-  //        ['2007',  1030,      540]
- //       ]);
-
-		  
-		     // grab the CSV
-   $.get("temp.txt", function(csvString) {
-      // transform the CSV string into a 2-dimensional array
+<script type="text/javascript">
+    google.charts.load('current', {
+  callback: function () {
+    $.get("temp.csv", function(csvString) {
       var arrayData = $.csv.toArrays(csvString, {onParseValue: $.csv.hooks.castToScalar});
 
-      // this new DataTable object holds all the data
       var data = new google.visualization.arrayToDataTable(arrayData);
 
-    
-        var options = {
-          title: 'Company Performance',
-          curveType: 'function',
-          legend: { position: 'bottom' }
-        };
+      var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+      chart.draw(data);
+    });
+  },
+  packages: ['corechart']
+});
+</script>
+</head>
 
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+<body>
+    <!--Div that will hold the pie chart-->
+    <div id="chart_div"></div>
+</body>
 
-        chart.draw(data, options);
-      }
-    </script>
-  </head>
-  <body>
-    <div id="chart" style="width: 900px; height: 500px"></div>
-  </body>
 </html>
