@@ -29,12 +29,12 @@ header {
 
 }
 .button2 {
-	width: 200px;
+	width: 150px;
 	height: 40px;
 	
 	margin-top: 0px;
 	margin-right: 10px;
-	margin-bottom: 0px;
+	margin-bottom: -10px;
 	margin-left: auto;
 	
 	padding-top: 0px;
