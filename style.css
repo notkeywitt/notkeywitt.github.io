@@ -67,6 +67,16 @@ header {
 	letter-spacing: 4px;
 }
 
+.work {
+	background-image: url(kwbkg1.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	-webkit-background-size: cover; 
+	background-size: cover;
+	width: 100%;
+	height: inherit;
+}
+
 .hero {
 	background-color: #B3B1B2;
 	padding-top: 30px;
@@ -114,7 +124,7 @@ header {
 	float: right;
 	font-weight: bolder;
 	line-height: 23px;
-	opacity: 0.5;
+	opacity: .8;
 }
 
 
