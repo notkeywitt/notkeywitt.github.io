@@ -30,7 +30,7 @@ header {
 }
 .button2 {
 	width: 200px;
-	height: 50px;
+	height: 40px;
 	
 	margin-top: 0px;
 	margin-right: 0px;
@@ -44,10 +44,9 @@ header {
 	
 	text-align: center;
 	border-radius: 0px;
-	text-transform: uppercase;
 	font-weight: bold;
 	letter-spacing: 2px;
-	border: 20px solid #FFFFFF;
+	border: 10px solid #FFFFFF;
 	color: #FFFFFF;
 	transition: all 0.3s linear;
 	list-style: none;
