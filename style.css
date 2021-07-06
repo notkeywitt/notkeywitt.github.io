@@ -24,14 +24,10 @@ width: 90%;
    display: block;
    margin-left: auto;
    margin-right: auto;
-   -webkit-transition: all 2s ease; 
-   -moz-transition: all 2s ease; 
-   -ms-transition: all 2s ease; 
-   -o-transition: all 2s ease; 
 }
 
 .hero {
-   background-color: #d48484;
+   background-color: #c44c4c;
    padding-top: 30px;
    padding-bottom: 40px;
 }
@@ -169,7 +165,7 @@ a:link, a:visited {
 
 
 .footer_banner {
-	background-color: #FF888A;
+	background-color: #c44c4c;
 	padding-top: 10px;
 	padding-bottom: 400PX;
 	margin-bottom: 0px;
