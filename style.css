@@ -22,7 +22,7 @@ body {
 header {
 	width: 100%;
 	height: 90px;
-	background-color: #3D3D3D;
+	background-color: #866c6c;
 	border-bottom: 5px solid #B3B1b6;
 	list-style-type: none;
 	text-align: right;
@@ -74,7 +74,7 @@ header {
 }
 
 .hero {
-	background-color: #B3B1B2;
+	background-color: #866c6c;
 	padding-top: 30px;
 	padding-bottom: 40px;
 }
