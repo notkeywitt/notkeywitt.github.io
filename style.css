@@ -1,6 +1,6 @@
 @charset "UTF-8";
 body {
-	font-family: source-sans-pro;
+	font-family: sans-serif;
 	background-color: white;
 	margin-top: 0px;
 	margin-right: 0px;
@@ -25,6 +25,8 @@ header {
 	background-color: #3D3D3D;
 	border-bottom: 5px solid #B3B1b6;
 	list-style-type: none;
+	text-align: right;
+	font-family: sans-serif;
 }
 .button2 {
 	width: 200px;
