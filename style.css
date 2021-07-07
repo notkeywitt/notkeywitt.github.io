@@ -21,9 +21,9 @@ body {
 
 .work {
 	display: block;
-	margin-left: auto;
-	margin-right: auto;
-	width: "500";
+	margin-left: 20;
+	margin-right: 20;
+	width: 100%;
 }
 
 .hero {
