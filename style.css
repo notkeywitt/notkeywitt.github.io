@@ -19,19 +19,7 @@ body {
 	background-color: #FFFFFF;
 }
 
-img {
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
-	margin-bottom: 4px;
-	width:70%;
-  }
 
-.work {
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
-}
 
 .hero {
    background-color: #c44c4c;
