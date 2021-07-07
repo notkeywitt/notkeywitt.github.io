@@ -19,11 +19,18 @@ body {
 	background-color: #FFFFFF;
 }
 
+img {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 4px;
+	width:70%;
+  }
+
 .work {
 	display: block;
-	margin-left: 20;
-	margin-right: 20;
-	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .hero {
