@@ -102,8 +102,8 @@ img {
 	text-align: center;
 	position: static;
 	bottom: 0;
-	left: 0;
-	margin-top: 0px;
+	right: 0;
+	padding-top: 100px;
 	width: fit-content;
 	background-color: #FFFFFF;
 }
