@@ -130,7 +130,7 @@ img {
 }
 
 /* Mobile */
-@media (max-width: 320px) {
+@media (max-width: 600px) {
 
 .title {
 	font-size: 4vw;
