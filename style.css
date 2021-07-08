@@ -133,11 +133,11 @@ img {
 @media (max-width: 600px) {
 
 .title {
-	font-size: 5vw;
+	font-size: 3vw;
 	text-align: center;
 }
 .tagline {
-	font-size: 5vw;
+	font-size: 2vw;
 	text-align: center;
 }
 .nav a{
@@ -149,7 +149,7 @@ img {
 	color: #FFFFFF;
 	transition: all 0.3s linear;  
 	background-color: #2f5245;
-	font-size: 5vw;
+	font-size: 3vw;
 }
 
 
