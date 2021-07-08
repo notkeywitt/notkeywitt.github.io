@@ -26,6 +26,7 @@ body {
 	margin-top: 0px;
 	width: fit-content;
 	background-color: #FFFFFF;
+	font-size: medium;
 }
 
 .nav a{
@@ -37,6 +38,7 @@ body {
 	color: #FFFFFF;
 	transition: all 0.3s linear;  
 	background-color: #2f5245;
+	font-size: medium;
 }
 
 .nav a:hover{
@@ -66,7 +68,7 @@ a:link, a:visited {
 	text-align: right;
 	font-size: large;
 	margin-top: 10px;
-	margin-right: 0px;
+	margin-right: 5px;
 	margin-left: 10px;
 	letter-spacing: 2px;
 }
@@ -78,6 +80,7 @@ a:link, a:visited {
 	color: #000000;
 	background-color: #ffffff;
 	font-weight: lighter;
+	margin-right: 5px;
 
 }
 
@@ -96,16 +99,17 @@ img {
 
 .footer {
 	display: grid;
-	grid-template-areas: ' email phone ';
+	grid-template-areas:'email phone';
 	grid-gap: 0px;
-	padding-bottom: 100%;
+	padding: 0px;
 	text-align: center;
 	position: static;
-	bottom: 0;
-	right: 0;
-	padding-top: 100px;
+	
+	margin-top: 0px;
 	width: fit-content;
 	background-color: #FFFFFF;
+	font-size: medium;
+
 }
 .footer a{
 	text-align: center;
