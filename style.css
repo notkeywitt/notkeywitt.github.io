@@ -24,13 +24,13 @@ body {
 	text-align: center;
 }
 .header {
-	grid-column: 4 / 6 ;
+	grid-column: 4 / 5;
 	text-align: right;
 }
 
 .nav {
 	display: grid;
-	grid-template-columns: 1fr 1fr 3fr 1fr 1fr;
+	grid-template-columns: 1fr 1fr 1fr 3fr  1fr 1fr 1fr;
 	grid-gap: 0px;
 	padding-top: 16px;
 	text-align: center;
@@ -39,11 +39,10 @@ body {
 	margin-top: 0px;
 	background-color: #FFFFFF;
 	font-size: 1.5vw;
+	width:100%;
 }
 
 .nav a{
-
-	padding-left: 2vw;
 	border-radius: 0px;
 	font-weight: bold;
 	letter-spacing: 2px;
