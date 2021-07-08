@@ -133,11 +133,11 @@ img {
 @media (max-width: 600px) {
 
 .title {
-	font-size: 4vw;
+	font-size: 6vw;
 	text-align: center;
 }
 .tagline {
-	font-size: 4vw;
+	font-size: 6vw;
 	text-align: center;
 }
 }
