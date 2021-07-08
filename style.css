@@ -9,7 +9,9 @@ body {
 	font-style: normal;
 	font-weight: 200;
 	list-style-type: none;
+	text-align: center;
 }
+
 
 .bar {
 	height: 100px;
