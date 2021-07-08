@@ -40,7 +40,7 @@ body {
 	color: #FFFFFF;
 	transition: all 0.3s linear;  
 	background-color: #2f5245;
-	font-size: medium;
+	font-size: 2vw;
 }
 
 .nav a:hover{
@@ -68,7 +68,7 @@ a:link, a:visited {
 	color: #2f5245;
 	background-color: #ffffff;
 	text-align: right;
-	font-size: large;
+	font-size: 2vw;
 	margin-top: 10px;
 	margin-right: 5px;
 	margin-left: 10px;
@@ -78,7 +78,7 @@ a:link, a:visited {
 .tagline {
 	grid-area: tagline;
 	text-align: right;
-	font-size: medium;
+	font-size: 1vw;
 	color: #000000;
 	background-color: #ffffff;
 	font-weight: lighter;
