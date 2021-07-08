@@ -40,7 +40,7 @@ body {
 	color: #FFFFFF;
 	transition: all 0.3s linear;  
 	background-color: #2f5245;
-	font-size: 1.5vw;
+	font-size: 2vw;
 }
 
 .nav a:hover{
@@ -78,7 +78,7 @@ a:link, a:visited {
 .tagline {
 	grid-area: tagline;
 	text-align: right;
-	font-size: 1.5vw;
+	font-size: 2vw;
 	color: #000000;
 	background-color: #ffffff;
 	font-weight: lighter;
@@ -133,9 +133,11 @@ img {
 @media (max-width: 320px) {
 
 .title {
-	padding-left: 10px;
-	padding-right: 10px;
-	line-height: 22px;
+	font-size: 4vw;
+	text-align: center;
+}
+.tagline {
+	font-size: 4vw;
 	text-align: center;
 }
 }
