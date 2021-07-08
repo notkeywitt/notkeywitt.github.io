@@ -134,21 +134,11 @@ img {
 
 .title {
 	font-size: 3vw;
-	text-align: center;
 }
 .tagline {
 	font-size: 2vw;
-	text-align: center;
 }
-.nav a{
-	text-align: center;
-	border-radius: 0px;
-	font-weight: bold;
-	letter-spacing: 2px;
-	border: 1vw solid #FFFFFF;
-	color: #FFFFFF;
-	transition: all 0.3s linear;  
-	background-color: #2f5245;
+.nav{
 	font-size: 3vw;
 }
 
