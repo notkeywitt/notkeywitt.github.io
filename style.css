@@ -12,29 +12,38 @@ body {
 	text-align: center;
 }
 
-
 .bar {
-	height: 100px;
+	height: 12vh;
 }
+.work {
+	grid-column: 1 / 2;
+	text-align: center;
+}
+.contact {
+	grid-column: 2 / 3;
+	text-align: center;
+}
+.header {
+	grid-column: 4 / 6 ;
+	text-align: right;
+}
+
 .nav {
 	display: grid;
-	grid-template-areas:'work contact header ';
+	grid-template-columns: 1fr 1fr 2fr;
 	grid-gap: 0px;
-	padding: 0px;
+	padding-top: 16px;
 	text-align: center;
 	position: fixed;
 	top: 0;
-	left: 0;
 	margin-top: 0px;
-	width: fit-content;
 	background-color: #FFFFFF;
-	font-size: medium;
+	font-size: 1.5vw;
 }
 
 .nav a{
-	padding-top: 4vh;
+
 	padding-left: 2vw;
-	text-align: center;
 	border-radius: 0px;
 	font-weight: bold;
 	letter-spacing: 2px;
@@ -46,21 +55,18 @@ body {
 }
 
 .nav a:hover{
-	background-color: rgb(255, 255, 255);
-	color: #2f5245;
+	background-color: #ffffff;
+	color: #233d34a2;
 	cursor: pointer;
 }
 
 a:link, a:visited {
-    color: 2f5245;
+    color: #2f5245;
     text-decoration: none;
 	list-style: none;
 }
 
-.header {
-	grid-area: header;
-	background-color: #ffffff;
-}
+
 
 .title{
 	grid-area: title;
@@ -70,7 +76,7 @@ a:link, a:visited {
 	font-size: 2vw;
 	margin-top: 0px;
 	margin-right: 0px;
-	margin-left: 10vw;
+	margin-left: 0vw;
 	letter-spacing: 2px;
 }
 
@@ -108,7 +114,6 @@ img {
 	padding: 0px;
 	text-align: center;
 	position: static;
-	
 	margin-top: 0px;
 	width: fit-content;
 	background-color: #FFFFFF;
@@ -132,7 +137,7 @@ img {
 }
 
 /* Mobile */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
 .title {
 	font-size: 3vw;
@@ -149,4 +154,4 @@ img {
 
 /* Small Tablets */
 @media (min-width: 600px)and (max-width: 800px) {
-
+}
