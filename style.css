@@ -30,7 +30,7 @@ body {
 
 .nav {
 	display: grid;
-	grid-template-columns: 1fr 1fr 2fr;
+	grid-template-columns: 1fr 1fr 3fr 1fr 1fr;
 	grid-gap: 0px;
 	padding-top: 16px;
 	text-align: center;
@@ -66,8 +66,6 @@ a:link, a:visited {
 	list-style: none;
 }
 
-
-
 .title{
 	grid-area: title;
 	color: #2f5245;
@@ -99,7 +97,7 @@ img {
 	margin-left: auto;
 	margin-right: auto;
 	margin-bottom: 4px;
-	width: 80%;  
+	width: 70%;  
 	height: auto; 
 }  
 
