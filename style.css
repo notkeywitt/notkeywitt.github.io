@@ -104,6 +104,14 @@ img {
 	height: 100%;
 }
 
+body{
+	display: block;
+	background-image: url('BKG1127-1.jpg');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
 .footer {
 	display: grid;
 	grid-template-areas:'email phone';
