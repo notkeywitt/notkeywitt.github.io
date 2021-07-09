@@ -86,7 +86,7 @@ a:link, a:visited {
 	background-color: #ffffff;
 	font-weight: lighter;
 	margin-top: 0px;
-	margin-right: 0px;
+	margin-right: 10px;
 	margin-left: 0vw;
 	letter-spacing: 2px;
 
@@ -101,8 +101,8 @@ img {
 	height: auto; 
 }  
 
-.screen {
-	height: 100%;
+.banner {
+	color: #ffffff3b;
 }
 
 
