@@ -25,13 +25,13 @@ body {
 	text-align: center;
 }
 .header {
-	grid-column: 4 / 5;
+	grid-column: 3 / 4;
 	text-align: right;
 }
 
 .nav {
 	display: grid;
-	grid-template-columns: 1fr 1fr 1fr 2fr 1fr 1fr 1fr;
+	grid-template-columns: 1fr 1fr 3fr 4fr;
 	grid-gap: 0px;
 	padding-top: 16px;
 	text-align: center;
@@ -39,7 +39,7 @@ body {
 	top: 0;
 	margin-top: 0px;
 	background-color: #FFFFFF;
-	font-size: 1.5vw;
+	font-size: 2vw;
 	width:100%;
 }
 
@@ -51,7 +51,7 @@ body {
 	color: #2f5245;
 	transition: all 0.3s linear;  
 	background-color: #ffffff;
-	font-size: 1.5vw;
+	font-size: 2w;
 }
 
 .nav a:hover{
@@ -70,7 +70,7 @@ a:link, a:visited {
 	color: #2f5245;
 	background-color: #ffffff;
 	text-align: right;
-	font-size: 2vw;
+	font-size: 3vw;
 	margin-top: 0px;
 	margin-right: 0px;
 	margin-left: 0vw;
