@@ -139,6 +139,9 @@ img {
 /* Mobile */
 @media (max-width: 600px) {
 
+body{
+	font-size: 10vw;
+}
 .title {
 	font-size: 4vw;
 }
