@@ -18,6 +18,7 @@ body {
 .work {
 	grid-column: 1 / 2;
 	text-align: center;
+	padding-left: 6vw;
 }
 .contact {
 	grid-column: 2 / 3;
@@ -133,13 +134,13 @@ img {
 }
 
 /* Mobile */
-@media (max-width: 700px) {
+@media (max-width: 600px) {
 
 .title {
 	font-size: 4vw;
 }
 .tagline {
-	font-size: 4vw;
+	font-size: 3vw;
 }
 .nav a{
 	font-size: 4vw;
