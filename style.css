@@ -139,7 +139,7 @@ img {
 /* Mobile */
 @media (max-width: 600px) {
 
-body{
+.banner{
 	font-size: 10vw;
 }
 .title {
