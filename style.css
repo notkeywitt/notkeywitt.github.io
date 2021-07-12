@@ -12,9 +12,19 @@ body {
 	text-align: center;
 }
 
+.grid-container{
+	display: block;
+	width: 100%;
+	height: 10px;
+	background-color: #FFFFFF;
+}
+
 .work {
 	text-align: center;
 	padding-left: 6vw;
+	height: 40px; 
+
+	
 }
 .contact {
 	text-align: center;
@@ -24,18 +34,20 @@ body {
 }
 .icon{
 	width: auto;
-	height: 6vh;
+	height: auto;
 }
 .icon > img {
-	width: auto;
-	max-height: 10vh; 
+	width: 10vh;
+	min-width: 40px;
+	height: auto; 
 }
 
 .nav {
 	display: grid;
 	grid-template-columns: 1fr 1fr 3fr 1fr 5fr;
+	grid-template-rows: auto 1fr;
 	grid-gap: 0px;
-	padding-top: 16px;
+	padding-top: 10px;
 	padding-bottom: 10px;
 	text-align: center;
 	position: fixed;
@@ -44,6 +56,7 @@ body {
 	background-color: #FFFFFF;
 	font-size: 2vw;
 	width:100%;
+	height:auto;
 	table-layout: fixed;
 }
 
@@ -105,7 +118,16 @@ a:link, a:visited {
 }  
 
 .banner {
-	color: #ffffff71;
+	justify-content: center; 
+	margin-left: auto;
+	margin-right: auto;
+	grid-gap: 4px;
+	grid-row-gap: 10px;
+	padding-top: 20vh;
+	padding-bottom: 10px;
+	text-align: center;
+	top: 0;
+	margin-top: 0px;
 }
 
 .portfolio{
@@ -116,7 +138,7 @@ a:link, a:visited {
 	margin-right: auto;
 	grid-gap: 4px;
 	grid-row-gap: 10px;
-	padding-top: 16vh;
+	padding-top: 20vh;
 	padding-bottom: 10px;
 	text-align: center;
 	top: 0;
