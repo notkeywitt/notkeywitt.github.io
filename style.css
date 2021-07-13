@@ -155,9 +155,6 @@ a:link, a:visited {
 	max-height: 100%;
   }
 
-  .portfolio > img:hover {
-	-webkit-transform: scale(2,2);
-  }
 .footer {
 	display: grid;
 	grid-template-areas:'email phone';
@@ -188,23 +185,24 @@ a:link, a:visited {
 }
 
 /* Mobile */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
-.banner{
-	font-size: 10vw;
-	font-weight: bolder;
-}
-.title {
-	font-size: 4vw;
-}
-.tagline {
-	font-size: 3vw;
-}
-.nav a{
-	font-size: 4vw;
-}
-
-
+	.banner{
+		font-size: 10vw;
+		font-weight: bolder;
+	}
+	.title {
+		font-size: 4vw;
+	}
+	.tagline {
+		font-size: 3vw;
+	}
+	.nav a{
+		font-size: 4vw;
+	}
+	.portfolio{
+		grid-template-columns: 1fr;
+	}
 }
 
 /* Small Tablets */
