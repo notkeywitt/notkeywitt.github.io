@@ -21,17 +21,21 @@ body {
 
 .work {
 	text-align: center;
-	padding-left: 6vw;
+	padding-left: 4vw;
 	height: 40px; 
-
-	
 }
+
 .contact {
 	text-align: center;
+	padding-left: 4vw;
+	height: 40px;
 }
+
 .header {
 	text-align: right;
+	padding-right: 4vw;
 }
+
 .icon{
 	width: auto;
 	height: auto;
@@ -203,8 +207,4 @@ a:link, a:visited {
 	.portfolio{
 		grid-template-columns: 1fr;
 	}
-}
-
-/* Small Tablets */
-@media (min-width: 600px)and (max-width: 800px) {
 }
