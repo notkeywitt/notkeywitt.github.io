@@ -14,42 +14,46 @@ body {
 
 .grid-container{
 	display: block;
-	width: 100%;
-
-	background-color: #FFFFFF;
+	width: 80%;
+	background-color: #ffffff00;
+	justify-content: center; 
 }
 
 .work {
 	text-align: center;
 	padding-left: 4vw;
 	height: 40px; 
+	background-color: #ffffff00;
 }
 
 .contact {
 	text-align: center;
 	padding-left: 4vw;
 	height: 40px;
+	background-color: #ffffff00;
 }
 
 .header {
 	text-align: right;
-	padding-right: 4vw;
+	background-color: #ffffff00;
 }
 
 .icon{
 	width: auto;
 	height: auto;
+	background-color: #ffffff00;
 }
 .icon > img {
 	width: 10vh;
 	min-width: 40px;
 	height: auto; 
+	background-color: #ffffff00;
 }
 
 .nav {
 	display: grid;
-	grid-template-columns: 1fr 1fr 3fr 1fr 5fr;
-	grid-template-rows: auto 1fr;
+	grid-template-columns: 1fr 1fr 1fr 3fr 1fr 6fr;
+	grid-template-rows: 1fr;
 	grid-gap: 0px;
 	padding-top: 10px;
 	padding-bottom: 10px;
@@ -57,9 +61,9 @@ body {
 	position: fixed;
 	top: 0;
 	margin-top: 0px;
-	background-color: #FFFFFF;
+	background-color: #ffffff00;
 	font-size: 2vw;
-	width:100%;
+	width:90%;
 	height:auto;
 	table-layout: fixed;
 }
@@ -68,15 +72,15 @@ body {
 	border-radius: 0px;
 	font-weight: bold;
 	letter-spacing: 2px;
-	border: 1vw solid #FFFFFF;
+	border: 0vw solid #FFFFFF;
 	color: #2f5245;
 	transition: all 0.3s linear;  
-	background-color: #ffffff;
+	background-color: #ffffff00;
 	font-size: 2w;
+
 }
 
 .nav a:hover{
-	background-color: #ffffff;
 	color: #233d34a2;
 	cursor: pointer;
 }
@@ -89,7 +93,7 @@ a:link, a:visited {
 .title{
 	grid-area: title;
 	color: #2f5245;
-	background-color: #ffffff;
+	background-color: #ffffff00;
 	text-align: right;
 	font-size: 3vw;
 	margin-top: 0px;
@@ -103,7 +107,7 @@ a:link, a:visited {
 	text-align: right;
 	font-size: 1.5vw;
 	color: #000000;
-	background-color: #ffffff;
+	background-color: #ffffff00;
 	font-weight: lighter;
 	margin-top: 0px;
 	margin-right: 10px;
@@ -137,26 +141,20 @@ a:link, a:visited {
 
 .portfolio{
 	display: grid;
-	grid-template-columns: 1fr 1fr 1fr;
+	grid-template-columns: 2fr 2fr 1.28fr;
+	grid-template-rows: 2fr;
 	justify-content: center; 
 	margin-left: auto;
 	margin-right: auto;
-	grid-gap: 4px;
 	grid-row-gap: 18px;
 	padding-top: 20vh;
-	padding-bottom: 100px;
-	text-align: center;
-	top: 0;
-	margin-top: 0px;
-	background-color: #FFFFFF;
-	font-size: 2vw;
-	width:90%;
+	width: 90%;
+	
 }
 
 .portfolio > img {
-	object-fit: cover;
-	width: 100%;
-	max-height: 100%;
+	object-fit: contain;
+	width: 98%;
   }
 
 .footer {
