@@ -17,6 +17,7 @@ body {
 	width: 80%;
 	background-color: #ffffff00;
 	justify-content: center; 
+	padding-bottom: 20vh;
 }
 
 .work {
@@ -139,23 +140,30 @@ a:link, a:visited {
 	color: #ffffff69;
 }
 
+ul {
+	display: flex;
+	flex-wrap: wrap;
+	list-style-type: none;
+  }
+  
+  li {
+	height: 60vh;
+	flex-grow: 1;
+
+  }
+  
+  img {
+	max-height: 100%;
+	min-width: 90%;
+	object-fit: cover;
+	vertical-align: bottom;
+  }
+
 .portfolio{
-	display: grid;
-	grid-template-columns: 2fr 2fr 1.28fr;
-	grid-template-rows: 2fr;
-	justify-content: center; 
 	margin-left: auto;
 	margin-right: auto;
-	grid-row-gap: 18px;
-	padding-top: 20vh;
 	width: 90%;
-	
 }
-
-.portfolio > img {
-	object-fit: contain;
-	width: 98%;
-  }
 
 .footer {
 	display: grid;
@@ -181,7 +189,6 @@ a:link, a:visited {
 	background-color: #2f5245;
 }
 
-
 .hidden {
 	display: none;
 }
@@ -205,4 +212,20 @@ a:link, a:visited {
 	.portfolio{
 		grid-template-columns: 1fr;
 	}
+	@media (max-aspect-ratio: 1/1) and (max-width: 480px) {
+		ul {
+		  flex-direction: row;
+		}
+	  
+		li {
+		  height: auto;
+		  width: 100%;
+		}
+	  
+		img {
+		  width: 100%;
+		  max-height: 75vh;
+		  min-width: 0;
+		}
+	  }
 }
