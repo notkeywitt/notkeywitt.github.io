@@ -132,39 +132,48 @@ a:link, a:visited {
 	margin-right: auto;
 	grid-gap: 4px;
 	grid-row-gap: 10px;
-	padding-top: 20vh;
+	padding-top: 10vh;
 	padding-bottom: 10px;
 	text-align: center;
 	top: 0;
 	margin-top: 0px;
 	color: #ffffff69;
 }
+.portfolio {
+	display: flex;
+	flex-wrap: wrap;
+	list-style-type: none;
+	margin-left: auto;
+	margin-right: auto;
+}
 
-ul {
+div#portfolio li {
+	height: 60vh;
+	flex-grow: 1;
+	list-style-type: none;
+
+  }
+/*
+div#portfolio ul {
 	display: flex;
 	flex-wrap: wrap;
 	list-style-type: none;
   }
   
-  li {
+  div#portfolio li {
 	height: 60vh;
 	flex-grow: 1;
 
   }
   
-  img {
+  div#portfolio img {
 	max-height: 100%;
-	min-width: 90%;
+	min-width: 95%;
 	object-fit: cover;
 	vertical-align: bottom;
   }
 
-.portfolio{
-	margin-left: auto;
-	margin-right: auto;
-	width: 90%;
-}
-
+*/
 .footer {
 	display: grid;
 	grid-template-areas:'email phone';
@@ -194,7 +203,7 @@ ul {
 }
 
 /* Mobile */
-@media (max-width: 700px) {
+@media (max-width: 70px) {
 
 	.banner{
 		font-size: 10vw;
@@ -208,24 +217,29 @@ ul {
 	}
 	.nav a{
 		font-size: 4vw;
+	} 
+	.portfolio {
+		display: grid;
+		margin-left: auto;
+		margin-right: auto;
+	
 	}
-	.portfolio{
-		grid-template-columns: 1fr;
+
+	div#portfolio ul {
+		display: grid;
 	}
-	@media (max-aspect-ratio: 1/1) and (max-width: 480px) {
-		ul {
-		  flex-direction: row;
-		}
 	  
-		li {
+	div#portfolio li {
 		  height: auto;
 		  width: 100%;
-		}
+	}
 	  
-		img {
-		  width: 100%;
+	div#portfolio img {
+		  width: 90%;
+		  height: 90%;
 		  max-height: 75vh;
 		  min-width: 0;
-		}
-	  }
+	}
+}
+
 }
