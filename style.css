@@ -52,13 +52,23 @@ body {
 	justify-content: center; 
 }
 
-.nav a:hover{
+.nav a.darkBkg:hover{
 	color: #8db6a7b6;
 	cursor: pointer;
 }
 
-a:link, a:visited {
+.nav a.lightBkg:hover{
+	color: #8db6a7b6;
+	cursor: pointer;
+}
+
+a.darkBkg:link, a.darkBkg:visited {
     color: #ffffffb6;
+    text-decoration: none;
+}
+
+a.lightBkg:link, a.lightBkg:visited {
+	color: #4b635ab6;
     text-decoration: none;
 }
 
@@ -79,6 +89,13 @@ a:link, a:visited {
 .header > .title{
 	color: #2f5245b6;
 	font-size: 3vw;
+	letter-spacing: 2px;
+}
+
+.header > .tagline {
+	font-size: 1.5vw;
+	color: #00000075;
+	font-weight: lighter;
 	letter-spacing: 2px;
 }
 
