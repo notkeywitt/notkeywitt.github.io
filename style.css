@@ -47,7 +47,7 @@ body {
 	font-weight: bold;
 	letter-spacing: 2px;
 	border: 0vw solid #FFFFFF;
-	color: #8db6a7b6;
+	color: #ffffffb6;
 	transition: all 0.3s linear;  
 	background-color: #ffffff00;
 	justify-content: center; 
@@ -59,7 +59,7 @@ body {
 }
 
 a:link, a:visited {
-    color: #0f2e23b6;
+    color: #ffffffb6;
     text-decoration: none;
 }
 
@@ -146,16 +146,25 @@ li > img {
 	background-color: #00000000;
 	margin: auto;
 }
-
-.title {
-	font-size: 8vh;
-}
-.tagline {
+.work {
+	text-align:left;
+	margin: auto;
+	height: 40px; 
+	background-color: #ffffff00;
 	font-size: 3vh;
 }
-.nav a{
-	font-size: 4vh;
-} 
+.header > .title{
+	color: #2f5245b6;
+	font-size: 3vw;
+	letter-spacing: 2px;
+}
+
+.header > .tagline {
+	font-size: 1.5vw;
+	color: #ffffff75;
+	font-weight: lighter;
+	letter-spacing: 2px;
+}
 
 #portfolio {
 	display: grid;
