@@ -138,14 +138,23 @@ li > img {
 .banner{
 	font-weight: bolder;
 }
+
+.icon > img {
+	width: 10vw;
+	min-width: 40px;
+	height: auto; 
+	background-color: #00000000;
+	margin: auto;
+}
+
 .title {
-	font-size: 4vw;
+	font-size: 8vh;
 }
 .tagline {
-	font-size: 3vw;
+	font-size: 3vh;
 }
 .nav a{
-	font-size: 4vw;
+	font-size: 4vh;
 } 
 
 #portfolio {
@@ -166,13 +175,7 @@ li > img {
 	min-width: 0;
 }
 
-.icon > img {
-	width: 10vw;
-	min-width: 40px;
-	height: auto; 
-	background-color: #ffffff00;
-	margin: auto;
-}
+
 
 }
 
