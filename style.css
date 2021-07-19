@@ -21,7 +21,7 @@ body {
 
 #top{
 	display: block;
-	width: 80%;
+	width: 90%;
 	background-color: #ffffff00;
 	margin: auto;
 	padding-bottom: 20vh;
@@ -29,7 +29,7 @@ body {
 
 .nav {
 	display: grid;
-	grid-template-columns: 1fr 1fr 3fr  3fr ;
+	grid-template-columns: 1fr 1fr 3fr  2fr ;
 	grid-gap: 0px;
 	padding-top: 10px;
 	padding-bottom: 10px;
@@ -151,7 +151,7 @@ li > img {
 	margin: auto;
 	height: 40px; 
 	background-color: #ffffff00;
-	font-size: 3vh;
+	font-size: 2vh;
 }
 .header > .title{
 	color: #2f5245b6;
