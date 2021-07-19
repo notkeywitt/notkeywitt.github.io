@@ -28,7 +28,7 @@ body {
 
 .nav {
 	display: grid;
-	grid-template-columns: 1fr 1fr 2fr  2fr ;
+	grid-template-columns: 2fr  2fr  2fr ;
 	grid-gap: 0px;
 	padding-top: 10px;
 	padding-bottom: 10px;
@@ -78,6 +78,7 @@ a.lightBkg:link, a.lightBkg:visited {
 	height: 40px; 
 	background-color: #ffffff00;
 	font-size: 3vw;
+	word-spacing: 4vw;
 }
 
 .header {
