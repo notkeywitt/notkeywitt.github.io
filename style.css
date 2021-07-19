@@ -144,6 +144,7 @@ a.lightBkg:link, a.lightBkg:visited {
 	flex-direction: row;
 	list-style-type: none;
 	justify-content: space-around;
+	margin-top: 10vh;
 	
 }
 
