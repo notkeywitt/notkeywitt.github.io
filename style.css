@@ -29,7 +29,7 @@ body {
 
 .nav {
 	display: grid;
-	grid-template-columns: 1fr 1fr 3fr  2fr ;
+	grid-template-columns: 1fr 1fr 2fr  2fr ;
 	grid-gap: 0px;
 	padding-top: 10px;
 	padding-bottom: 10px;
@@ -93,11 +93,22 @@ a:link, a:visited {
 .icon{
 	margin: auto; 
 	background-color: #ffffff00;
+}
+.whiteIcon{
+	margin: auto; 
+	background-color: #ffffff00;
 	-webkit-filter: invert(100%);
     filter: invert(100%);
 }
 
+
 .icon > img {
+	width: 8vw;
+	min-width: 40px;
+	height: auto; 
+}
+
+.whiteIcon > img {
 	width: 8vw;
 	min-width: 40px;
 	height: auto; 
