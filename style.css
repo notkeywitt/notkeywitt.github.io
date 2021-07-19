@@ -23,7 +23,7 @@ body {
 	width: 90%;
 	background-color: #ffffff00;
 	margin: auto;
-	padding-bottom: 20vh;
+	margin-bottom: 30vh;
 }
 
 .nav {
@@ -144,12 +144,13 @@ a.lightBkg:link, a.lightBkg:visited {
 	flex-direction: row;
 	list-style-type: none;
 	justify-content: space-around;
-	margin-top: 10vh;
+	margin-bottom: 10vh;
 	
 }
 
 li {
 	height: 60vh;
+	flex: auto;
 	flex-grow: 1;
 	list-style-type: none;
 }
