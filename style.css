@@ -148,8 +148,9 @@ li > img {
 /* Mobile */
 @media (max-width: 700px) {
 
-.banner{
+#banner{
 	font-weight: bolder;
+	font-size: 6vh;
 }
 
 .icon > img {
@@ -164,19 +165,14 @@ li > img {
 	margin: auto;
 	height: 40px; 
 	background-color: #ffffff00;
-	font-size: 2vh;
+	font-size: 3vh;
 }
 .header > .title{
-	color: #2f5245b6;
-	font-size: 3vw;
-	letter-spacing: 2px;
+	font-size: 3vh;
 }
 
 .header > .tagline {
-	font-size: 1.5vw;
-	color: #ffffff75;
-	font-weight: lighter;
-	letter-spacing: 2px;
+	font-size: 2vh;
 }
 
 #portfolio {
