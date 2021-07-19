@@ -101,11 +101,7 @@ a:link, a:visited {
 	height: auto; 
 }
 
-
-
-
-
-.banner {
+#banner {
 	margin: auto;
 	padding-top: 10vh;
 	padding-bottom: 10px;
@@ -136,42 +132,12 @@ li > img {
 	vertical-align: bottom;
 }
 
-.footer {
-	display: grid;
-	grid-template-areas:'email phone';
-	grid-gap: 0px;
-	padding: 0px;
-	text-align: center;
-	position: static;
-	margin-top: 0px;
-	width: fit-content;
-	background-color: #FFFFFF;
-	font-size: medium;
-
-}
-.footer a{
-	text-align: center;
-	border-radius: 0px;
-	font-weight: bold;
-	letter-spacing: 2px;
-	border: 10px solid #FFFFFF;
-	color: #FFFFFF;
-	transition: all 0.3s linear;  
-	background-color: #2f5245;
-}
-
-.hidden {
-	display: none;
-}
-
 /* Mobile */
 @media (max-width: 700px) {
 
 .banner{
-	font-size: 10vw;
 	font-weight: bolder;
 }
-
 .title {
 	font-size: 4vw;
 }
