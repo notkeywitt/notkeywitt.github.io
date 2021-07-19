@@ -18,12 +18,20 @@ body {
 	z-index:-100
 }
 
+#banner {
+	margin: auto;
+	font-size: 6vw;
+	text-align: center;
+	color: #ffffff69;
+}
+
+
 #top{
 	display: block;
 	width: 90%;
 	background-color: #ffffff00;
 	margin: auto;
-	margin-bottom: 30vh;
+	padding-bottom: 15vw;
 }
 
 .nav {
@@ -31,7 +39,7 @@ body {
 	grid-template-columns: 2fr  2fr  2fr ;
 	grid-gap: 0px;
 	padding-top: 10px;
-	padding-bottom: 10px;
+	padding-bottom: 20px;
 	position: fixed;
 	top: 0;
 	margin: auto;
@@ -49,7 +57,8 @@ body {
 	color: #ffffffb6;
 	transition: all 0.3s linear;  
 	background-color: #ffffff00;
-	justify-content: center; 
+	justify-content: center;
+	margin: auto; 
 }
 
 .nav a.darkBkg:hover{
@@ -75,7 +84,7 @@ a.lightBkg:link, a.lightBkg:visited {
 .work {
 	text-align:left;
 	margin: auto;
-	height: 40px; 
+	height: 12vw; 
 	background-color: #ffffff00;
 	font-size: 3vw;
 	word-spacing: 4vw;
@@ -85,6 +94,8 @@ a.lightBkg:link, a.lightBkg:visited {
 	text-align: right;
 	background-color: #ffffff00;
 	margin: auto;
+	height: 12vw; 
+	
 }
 
 .header > .title{
@@ -100,25 +111,17 @@ a.lightBkg:link, a.lightBkg:visited {
 	letter-spacing: 2px;
 }
 
-.header > .tagline {
-	font-size: 1.5vw;
-	color: #ffffff75;
-	font-weight: lighter;
-	letter-spacing: 2px;
-}
-
 .icon{
 	margin: auto; 
 	background-color: #ffffff00;
 }
+
 .whiteIcon{
 	margin: auto; 
 	background-color: #ffffff00;
 	-webkit-filter: invert(100%);
     filter: invert(100%);
 }
-
-
 .icon > img {
 	width: 8vw;
 	min-width: 40px;
@@ -131,13 +134,6 @@ a.lightBkg:link, a.lightBkg:visited {
 	height: auto; 
 }
 
-#banner {
-	margin: auto;
-	font-size: 6vw;
-	padding-top: 10vh;
-	text-align: center;
-	color: #ffffff69;
-}
 
 #portfolio {
 	display: flex;
@@ -165,26 +161,35 @@ li > img {
 
 /* Mobile */
 @media (max-width: 700px) {
-
+#top{
+	padding-bottom: 25vw;
+}
 #banner{
 	font-weight: bolder;
-	font-size: 6vh;
+	font-size: 10vw;
 }
 
 .icon > img {
-	width: 10vw;
+	width: 15vw;
 	min-width: 40px;
 	height: auto; 
 	background-color: #00000000;
 	margin: auto;
 }
-.work {
-	text-align:left;
+
+.whiteIcon > img {
+	width: 20vw;
+	min-width: 40px;
+	height: auto; 
+	background-color: #00000000;
 	margin: auto;
-	height: 40px; 
-	background-color: #ffffff00;
-	font-size: 3vh;
 }
+
+.work{
+	font-size: 5vw;
+	word-spacing: 3vw;
+}
+
 .header > .title{
 	font-size: 3vh;
 }
