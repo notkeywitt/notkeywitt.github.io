@@ -1,67 +1,71 @@
 @charset "UTF-8";
 body {
 	font-family: Arial, Helvetica, sans-serif;
-	background-color: white;
-	margin-top: 0px;
-	margin-right: 0px;
-	margin-bottom: 0px;
-	margin-left: 0px;
+	background-color: rgb(255, 255, 255);
+	margin: 0px;
 	font-style: normal;
 	font-weight: 200;
 	font-size: 6vw;
 	text-align: center;
+	height: 100%;
+}
+
+#bkg {
+	position: fixed; 
+	top: 0; 
+	left: 0; 
+	width: 100vh;
+	min-width: 100%;
+	min-height: 100%;
+	z-index:-100
 }
 
 #top{
 	display: block;
 	width: 80%;
 	background-color: #ffffff00;
-	justify-content: center; 
-	padding-bottom: 16vh;
+	margin: auto;
+	padding-bottom: 20vh;
 }
 
 .work {
 	text-align: center;
+	margin: auto;
 	padding-left: 4vw;
 	height: 40px; 
-	background-color: #ffffff00;
-}
-
-.contact {
-	text-align: center;
-	padding-left: 4vw;
-	height: 40px;
 	background-color: #ffffff00;
 }
 
 .header {
 	text-align: right;
 	background-color: #ffffff00;
+	margin: auto;
 }
 
 .icon{
+	margin: auto; 
 	width: auto;
 	height: auto;
 	background-color: #ffffff00;
 }
 .icon > img {
-	width: 10vh;
+	width: 8vw;
 	min-width: 40px;
 	height: auto; 
 	background-color: #ffffff00;
+	margin: auto;
 }
 
 .nav {
 	display: grid;
-	grid-template-columns: 1fr 1fr 1fr 3fr 1fr 6fr;
-	grid-template-rows: 1fr;
+	grid-template-columns: 1fr 1fr 3fr  3fr ;
 	grid-gap: 0px;
 	padding-top: 10px;
 	padding-bottom: 10px;
 	text-align: center;
 	position: fixed;
 	top: 0;
-	margin-top: 0px;
+	margin: auto;
 	background-color: #ffffff00;
 	font-size: 2vw;
 	width:90%;
@@ -74,26 +78,26 @@ body {
 	font-weight: bold;
 	letter-spacing: 2px;
 	border: 0vw solid #FFFFFF;
-	color: #2f5245;
+	color: #8db6a7b6;
 	transition: all 0.3s linear;  
 	background-color: #ffffff00;
-	font-size: 2w;
+	justify-content: center; 
 
 }
 
 .nav a:hover{
-	color: #233d34a2;
+	color: #8db6a7b6;
 	cursor: pointer;
 }
 
 a:link, a:visited {
-    color: #2f5245;
+    color: #0f2e23b6;
     text-decoration: none;
 }
 
 .title{
 	grid-area: title;
-	color: #2f5245;
+	color: #2f5245b6;
 	background-color: #ffffff00;
 	text-align: right;
 	font-size: 3vw;
@@ -118,16 +122,11 @@ a:link, a:visited {
 }
 
 .banner {
-	justify-content: center; 
-	margin-left: auto;
-	margin-right: auto;
-	grid-gap: 4px;
-	grid-row-gap: 10px;
+	margin: auto;
 	padding-top: 10vh;
 	padding-bottom: 10px;
 	text-align: center;
 	top: 0;
-	margin-top: 0px;
 	color: #ffffff69;
 }
 
@@ -146,7 +145,7 @@ li {
 	list-style-type: none;
 }
   
-img {
+li > img {
 	max-height: 100%;
 	min-width: 95%;
 	object-fit: cover;
@@ -210,13 +209,21 @@ li {
 	width: auto;
 }
 	  
-img {
+li > img {
 	width: 95%;
 	height: 95%;
 	max-height: 75vh;
 	min-width: 0;
 }
 
+.icon > img {
+	width: 10vw;
+	min-width: 40px;
+	height: auto; 
+	background-color: #ffffff00;
+	margin: auto;
 }
 
 }
+
+
