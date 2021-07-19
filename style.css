@@ -93,6 +93,8 @@ a:link, a:visited {
 .icon{
 	margin: auto; 
 	background-color: #ffffff00;
+	-webkit-filter: invert(100%);
+    filter: invert(100%);
 }
 
 .icon > img {
