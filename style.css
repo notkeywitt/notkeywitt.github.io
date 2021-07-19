@@ -5,7 +5,6 @@ body {
 	margin: 0px;
 	font-style: normal;
 	font-weight: 200;
-	font-size: 6vw;
 	text-align: center;
 }
 
@@ -116,10 +115,9 @@ a:link, a:visited {
 
 #banner {
 	margin: auto;
+	font-size: 6vw;
 	padding-top: 10vh;
-	padding-bottom: 10px;
 	text-align: center;
-	top: 0;
 	color: #ffffff69;
 }
 
