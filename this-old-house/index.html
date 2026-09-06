@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>This Old House &mdash; player</title>
+<link rel="icon" href="../favicon.png">
+<style>
+:root{
+  --bg:#14110f; --panel:#1d1916; --panel-2:#262019; --line:#332b24;
+  --text:#efe9e2; --dim:#a2968a; --faint:#6f645b;
+  --accent:#d59a3c; --accent-fg:#14110f; --done:#5f8a55;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px 64px}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:30;background:rgba(20,17,15,.94);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+}
+.hrow{max-width:1080px;margin:0 auto;padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:.5px;margin-right:auto;white-space:nowrap}
+.brand small{display:block;font-weight:400;color:var(--faint);letter-spacing:1.5px;font-size:10px;text-transform:uppercase}
+#search{
+  flex:1 1 180px;min-width:140px;background:var(--panel-2);border:1px solid var(--line);
+  color:var(--text);border-radius:8px;padding:8px 10px;font-size:14px;
+}
+#search:focus{outline:none;border-color:var(--accent)}
+button{font:inherit;cursor:pointer}
+.btn{
+  background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+  border-radius:8px;padding:8px 12px;font-size:13px;white-space:nowrap;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
+.btn.primary:hover{color:var(--accent-fg);filter:brightness(1.08)}
+
+/* ---------- overall progress ---------- */
+.stats{display:flex;align-items:center;gap:10px;padding:12px 0 4px;color:var(--dim);font-size:12px}
+.bar{flex:1;height:4px;background:var(--panel-2);border-radius:3px;overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--accent)}
+
+/* ---------- player ---------- */
+.stage{margin:14px 0 6px;background:#000;border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative}
+.stage video{display:block;width:100%;aspect-ratio:16/9;background:#000}
+.placeholder{
+  aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;color:var(--faint);text-align:center;padding:20px;
+}
+.placeholder b{color:var(--dim);font-weight:600}
+#err{
+  position:absolute;left:0;right:0;bottom:0;background:rgba(20,17,15,.95);
+  border-top:1px solid var(--line);padding:12px 14px;font-size:13px;color:var(--dim);display:none;
+}
+#err b{color:#e0a0a0}
+
+.nowbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 2px 2px}
+.nowtitle{font-size:17px;font-weight:600;margin-right:auto}
+.nowtitle span{color:var(--faint);font-weight:400;font-size:13px;margin-left:8px}
+
+/* ---------- seasons ---------- */
+h2{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--faint);
+   margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.seasons{display:flex;flex-wrap:wrap;gap:6px}
+.season{
+  background:var(--panel);border:1px solid var(--line);color:var(--dim);
+  border-radius:7px;padding:6px 9px;font-size:13px;min-width:42px;position:relative;
+}
+.season:hover{color:var(--text)}
+.season.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:700}
+.season.all{color:var(--done)}
+.season.sel.all{color:var(--accent-fg)}
+
+/* ---------- episode grid ---------- */
+.eps{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
+.ep{
+  text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--text);
+  border-radius:9px;padding:10px 11px 9px;position:relative;overflow:hidden;
+}
+.ep:hover{border-color:var(--accent)}
+.ep .code{font-size:13px;font-weight:600}
+.ep .state{display:block;font-size:11px;color:var(--faint);margin-top:3px;min-height:15px}
+.ep.done .code{color:var(--done)}
+.ep.now{border-color:var(--accent);background:var(--panel-2)}
+.ep.now .code{color:var(--accent)}
+.ep .pb{position:absolute;left:0;bottom:0;height:3px;background:var(--accent);width:0}
+.ep.done .pb{background:var(--done)}
+.check{position:absolute;top:8px;right:9px;font-size:12px;color:var(--done)}
+
+footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);
+  color:var(--faint);font-size:12px;line-height:1.7}
+footer a{color:var(--dim)}
+@media (max-width:520px){
+  .eps{grid-template-columns:repeat(auto-fill,minmax(108px,1fr))}
+  .nowtitle{font-size:15px;width:100%}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <div class="brand">This Old House<small>1979 &ndash; 2020 &middot; 41 seasons</small></div>
+    <input id="search" type="search" placeholder="Jump to&hellip;  s12e04, 12x4, 305" autocomplete="off" spellcheck="false">
+    <button class="btn primary" id="resume">Resume</button>
+    <button class="btn" id="menu" title="Progress data">&hellip;</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="stats">
+    <span id="statText">&nbsp;</span>
+    <span class="bar"><i id="statBar"></i></span>
+  </div>
+
+  <div class="stage">
+    <video id="video" controls playsinline preload="metadata" style="display:none"></video>
+    <div class="placeholder" id="placeholder">
+      <b>Pick an episode below</b>
+      <span>or press Resume to pick up where you left off</span>
+    </div>
+    <div id="err"></div>
+  </div>
+
+  <div class="nowbar">
+    <div class="nowtitle" id="nowTitle">Nothing playing</div>
+    <button class="btn" id="prev">&larr; Prev</button>
+    <button class="btn" id="next">Next &rarr;</button>
+    <button class="btn" id="toggleDone">Mark watched</button>
+    <a class="btn" id="srcLink" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none">Source&nbsp;&nearr;</a>
+  </div>
+
+  <h2>Seasons</h2>
+  <div class="seasons" id="seasons"></div>
+
+  <h2 id="epsHead">Episodes</h2>
+  <div class="eps" id="eps"></div>
+
+  <footer>
+    Progress is saved in this browser only (localStorage), per device. Use
+    <b>&hellip; &rarr; Export</b> to move it to another browser.<br>
+    Keys: <b>space</b> play/pause &middot; <b>&larr;/&rarr;</b> seek 10s &middot;
+    <b>N/P</b> next/previous episode &middot; <b>F</b> fullscreen.<br>
+    Streams come from the source CDN. If a video will not start here, use
+    <b>Source&nbsp;&nearr;</b> to open the stream URL directly.
+  </footer>
+</div>
+
+<script src="episodes.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.17/hls.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var EPS   = window.TOH_EPISODES || [];
+  var BASE  = window.TOH_BASE;
+  var KEY   = "toh.progress.v1";
+  var KEYAT = "toh.current.v1";
+
+  var video = document.getElementById("video");
+  var ph    = document.getElementById("placeholder");
+  var errEl = document.getElementById("err");
+  var hls   = null;
+  var cur   = -1;          // index into EPS, playing now
+  var queued= -1;          // restored from last visit, not loaded into the element yet
+  var seekedOnce = false;
+
+  /* ---------- model ---------- */
+  function key(i){ return EPS[i][0] + "-" + EPS[i][1]; }
+  function code(i){
+    return "S" + String(EPS[i][0]).padStart(2,"0") + "E" + String(EPS[i][1]).padStart(2,"0");
+  }
+  function url(i){ return BASE + EPS[i][2] + ".m3u8"; }
+
+  var store = load();
+  function load(){
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+    catch(e){ return {}; }
+  }
+  /* newest record wins, and "done" is never undone by a merge */
+  function merge(into, from){
+    var changed = false;
+    Object.keys(from || {}).forEach(function(k){
+      var a = into[k], b = from[k];
+      if (!b) return;
+      if (!a || (b.ts || 0) > (a.ts || 0)){ into[k] = b; changed = true; }
+      else if (b.done && !a.done){ a.done = true; changed = true; }
+    });
+    return changed;
+  }
+
+  var saveTimer = null;
+  function save(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 250);
+  }
+  function saveNow(){
+    clearTimeout(saveTimer);
+    try {
+      merge(store, load());          // pick up anything another tab wrote
+      localStorage.setItem(KEY, JSON.stringify(store));
+    } catch(e){}
+  }
+  function rec(i){ return store[key(i)] || null; }
+  function setCurrent(i){
+    try { localStorage.setItem(KEYAT, key(i)); } catch(e){}
+  }
+  function getCurrent(){
+    var k;
+    try { k = localStorage.getItem(KEYAT); } catch(e){ k = null; }
+    if (k) { for (var i=0;i<EPS.length;i++) if (key(i) === k) return i; }
+    // fall back to the most recently touched episode
+    var best = -1, bestTs = -1;
+    for (var j=0;j<EPS.length;j++){
+      var r = rec(j);
+      if (r && r.ts > bestTs){ bestTs = r.ts; best = j; }
+    }
+    return best;
+  }
+  /* the next unwatched episode at or after i */
+  function nextUnwatched(from){
+    for (var i=Math.max(0,from);i<EPS.length;i++){
+      var r = rec(i);
+      if (!r || !r.done) return i;
+    }
+    return -1;
+  }
+  function pct(i){
+    var r = rec(i);
+    if (!r) return 0;
+    if (r.done) return 1;
+    if (!r.d || !r.t) return 0;
+    return Math.min(1, r.t / r.d);
+  }
+  function fmt(sec){
+    sec = Math.max(0, Math.round(sec));
+    var h = Math.floor(sec/3600), m = Math.floor(sec%3600/60), s = sec%60;
+    return (h ? h + ":" + String(m).padStart(2,"0") : String(m)) + ":" + String(s).padStart(2,"0");
+  }
+
+  /* ---------- playback ---------- */
+  function play(i, autoplay){
+    if (i < 0 || i >= EPS.length) return;
+    if (cur >= 0 && cur !== i) remember(true);
+    cur = i;
+    queued = -1;
+    seekedOnce = false;
+    setCurrent(i);
+    errEl.style.display = "none";
+    ph.style.display = "none";
+    video.style.display = "block";
+
+    var src = url(i);
+    if (hls){ hls.destroy(); hls = null; }
+
+    if (window.Hls && window.Hls.isSupported()){
+      hls = new window.Hls({ maxBufferLength: 30, enableWorker: true });
+      hls.on(window.Hls.Events.ERROR, function(evt, data){
+        if (!data.fatal) return;
+        if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) { fail("network"); }
+        else if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) { try { hls.recoverMediaError(); } catch(e){ fail("media"); } }
+        else fail(data.details || "playback");
+      });
+      hls.loadSource(src);
+      hls.attachMedia(video);
+      if (autoplay !== false) hls.on(window.Hls.Events.MANIFEST_PARSED, tryPlay);
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")){
+      video.src = src;                         // Safari / iOS play HLS natively
+      if (autoplay !== false) video.addEventListener("loadedmetadata", tryPlay, { once:true });
+    } else if (!window.Hls){
+      fail("library");
+    } else {
+      fail("unsupported");
+    }
+
+    render();
+    paintNow();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function tryPlay(){ var p = video.play(); if (p && p.catch) p.catch(function(){}); }
+
+  function fail(what){
+    errEl.innerHTML = (what === "library")
+      ? "<b>The hls.js player library did not load.</b> " +
+        "Check the network, then reload. Meanwhile <b>Source&nbsp;&nearr;</b> opens the stream URL directly."
+      : "<b>This stream would not load here (" + what + ").</b> " +
+        "The CDN may require a fresh link, or may block playback from this page. " +
+        "Try <b>Source&nbsp;&nearr;</b> to open the stream URL directly.";
+    errEl.style.display = "block";
+  }
+
+  /* resume position once metadata is known */
+  video.addEventListener("loadedmetadata", function(){
+    if (cur < 0 || seekedOnce) return;
+    seekedOnce = true;
+    var r = rec(cur);
+    if (r && !r.done && r.t > 30 && (!video.duration || r.t < video.duration - 30)){
+      try { video.currentTime = r.t; } catch(e){}
+    }
+  });
+
+  function remember(force){
+    if (cur < 0) return;
+    var d = isFinite(video.duration) ? video.duration : 0;
+    var t = video.currentTime || 0;
+    if (!d && !t && !force) return;
+    var r = store[key(cur)] || {};
+    r.t = t; if (d) r.d = d;
+    r.ts = Date.now();
+    if (d && t / d >= 0.95) r.done = true;
+    store[key(cur)] = r;
+    save();
+    paintTile(cur);
+    paintStats();
+  }
+
+  var tick = null;
+  video.addEventListener("playing", function(){
+    clearInterval(tick);
+    tick = setInterval(remember, 5000);
+  });
+  ["pause","seeked","waiting"].forEach(function(ev){
+    video.addEventListener(ev, function(){ remember(); });
+  });
+  video.addEventListener("ended", function(){
+    clearInterval(tick);
+    if (cur < 0) return;
+    var r = store[key(cur)] || {};
+    r.done = true; r.t = 0; r.ts = Date.now();
+    store[key(cur)] = r;
+    saveNow();
+    if (cur + 1 < EPS.length) play(cur + 1, true);
+    else { render(); paintNow(); }
+  });
+  window.addEventListener("pagehide", function(){ remember(true); saveNow(); });
+  document.addEventListener("visibilitychange", function(){
+    if (document.hidden){ remember(true); saveNow(); }
+  });
+
+  /* ---------- rendering ---------- */
+  var seasons = [];
+  for (var i=0;i<EPS.length;i++) if (seasons.indexOf(EPS[i][0]) === -1) seasons.push(EPS[i][0]);
+  var shown = seasons[0];
+
+  var seasonsEl = document.getElementById("seasons");
+  var epsEl     = document.getElementById("eps");
+  var epsHead   = document.getElementById("epsHead");
+  var tiles     = {};                 // episode index -> button
+
+  function seasonDone(s){
+    var all = true, any = false;
+    for (var i=0;i<EPS.length;i++){
+      if (EPS[i][0] !== s) continue;
+      any = true;
+      var r = rec(i);
+      if (!r || !r.done){ all = false; break; }
+    }
+    return any && all;
+  }
+
+  function renderSeasons(){
+    seasonsEl.innerHTML = "";
+    seasons.forEach(function(s){
+      var b = document.createElement("button");
+      b.className = "season" + (s === shown ? " sel" : "") + (seasonDone(s) ? " all" : "");
+      b.textContent = s;
+      b.title = "Season " + s + (seasonDone(s) ? " — fully watched" : "");
+      b.onclick = function(){ shown = s; render(); };
+      seasonsEl.appendChild(b);
+    });
+  }
+
+  function here(){ return cur >= 0 ? cur : queued; }
+
+  function paintTile(i){
+    var b = tiles[i];
+    if (!b) return;
+    var r = rec(i), p = pct(i);
+    b.className = "ep" + (r && r.done ? " done" : "") + (i === here() ? " now" : "");
+    var state = "";
+    if (r && r.done) state = "watched";
+    else if (r && r.t > 30 && r.d) state = fmt(r.d - r.t) + " left";
+    else if (r && r.t > 30) state = "at " + fmt(r.t);
+    b.querySelector(".state").textContent =
+      (i === cur) ? (state ? "playing · " + state : "playing")
+                  : (i === queued && cur < 0) ? (state ? "next up · " + state : "next up")
+                  : state;
+    b.querySelector(".pb").style.width = (p * 100) + "%";
+    b.querySelector(".check").textContent = (r && r.done) ? "✓" : "";
+  }
+
+  function render(){
+    renderSeasons();
+    var list = [];
+    for (var i=0;i<EPS.length;i++) if (EPS[i][0] === shown) list.push(i);
+    var doneCount = list.filter(function(i){ var r = rec(i); return r && r.done; }).length;
+    epsHead.textContent = "Season " + shown + " — " + doneCount + " of " + list.length + " watched";
+
+    epsEl.innerHTML = "";
+    tiles = {};
+    list.forEach(function(i){
+      var b = document.createElement("button");
+      b.innerHTML = '<span class="code"></span><span class="state"></span>' +
+                    '<span class="check"></span><i class="pb"></i>';
+      b.querySelector(".code").textContent = code(i);
+      b.onclick = function(){ play(i, true); };
+      b.oncontextmenu = function(e){ e.preventDefault(); toggleDone(i); };
+      epsEl.appendChild(b);
+      tiles[i] = b;
+      paintTile(i);
+    });
+    paintStats();
+  }
+
+  function paintNow(){
+    var t = document.getElementById("nowTitle");
+    var link = document.getElementById("srcLink");
+    var i = cur >= 0 ? cur : queued;
+    if (i < 0){ t.textContent = "Nothing playing"; link.style.display = "none"; return; }
+    t.innerHTML = code(i) + "<span>Season " + EPS[i][0] + ", episode " + EPS[i][1] +
+                  " · " + (i + 1) + " of " + EPS.length + (cur < 0 ? " · queued" : "") + "</span>";
+    link.href = url(i);
+    link.style.display = "";
+    document.getElementById("toggleDone").textContent =
+      (rec(i) && rec(i).done) ? "Mark unwatched" : "Mark watched";
+    document.title = code(i) + " — This Old House";
+  }
+
+  function paintStats(){
+    var done = 0, started = 0;
+    for (var i=0;i<EPS.length;i++){
+      var r = rec(i);
+      if (r && r.done) done++;
+      else if (r && r.t > 30) started++;
+    }
+    document.getElementById("statText").textContent =
+      done + " of " + EPS.length + " watched" + (started ? " · " + started + " in progress" : "");
+    document.getElementById("statBar").style.width = (done / EPS.length * 100) + "%";
+  }
+
+  function toggleDone(i){
+    var r = store[key(i)] || {};
+    r.done = !r.done;
+    if (r.done) r.t = 0;
+    r.ts = Date.now();
+    store[key(i)] = r;
+    saveNow();
+    paintTile(i);
+    paintStats();
+    renderSeasons();
+    if (i === here()) paintNow();
+  }
+
+  /* ---------- controls ---------- */
+  document.getElementById("prev").onclick = function(){ var i = here(); if (i > 0) play(i - 1, true); };
+  document.getElementById("next").onclick = function(){ var i = here(); if (i >= 0 && i + 1 < EPS.length) play(i + 1, true); };
+  document.getElementById("toggleDone").onclick = function(){ var i = here(); if (i >= 0) toggleDone(i); };
+
+  document.getElementById("resume").onclick = function(){
+    var i = here();
+    if (i < 0){                             // nothing seen yet, or progress was erased
+      var n = nextUnwatched(0);
+      i = (n >= 0) ? n : 0;
+    } else if (cur < 0 && rec(i) && rec(i).done){
+      var n2 = nextUnwatched(i + 1);
+      if (n2 >= 0) i = n2;
+    }
+    shown = EPS[i][0];
+    play(i, true);
+  };
+
+  /* search: s12e04 | 12x4 | 12 4 | 305 (absolute) | 12 (season) */
+  document.getElementById("search").addEventListener("keydown", function(e){
+    if (e.key !== "Enter") return;
+    var q = this.value.trim().toLowerCase();
+    if (!q) return;
+    var m = q.match(/^s?(\d{1,2})\s*(?:e|x|\s|-)\s*(\d{1,2})$/);
+    if (m){
+      var s = +m[1], ep = +m[2];
+      for (var i=0;i<EPS.length;i++){
+        if (EPS[i][0] === s && EPS[i][1] === ep){ shown = s; play(i, true); this.blur(); return; }
+      }
+      return;
+    }
+    var n = q.match(/^#?(\d{1,4})$/);
+    if (n){
+      var v = +n[1];
+      if (v >= 1 && v <= seasons.length && v <= 41 && q.length <= 2){ shown = v; render(); this.blur(); return; }
+      if (v >= 1 && v <= EPS.length){ shown = EPS[v-1][0]; play(v - 1, true); this.blur(); }
+    }
+  });
+
+  /* export / import / reset */
+  document.getElementById("menu").onclick = function(){
+    var what = prompt(
+      "Progress data\n\n" +
+      "  1  Export progress to a file\n" +
+      "  2  Import progress from a file\n" +
+      "  3  Erase all progress\n\n" +
+      "Type a number:", "1");
+    if (what === "1"){
+      var blob = new Blob([JSON.stringify({ v:1, at:localStorage.getItem(KEYAT), progress:store }, null, 1)],
+                          { type:"application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "this-old-house-progress.json";
+      a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
+    } else if (what === "2"){
+      var f = document.createElement("input");
+      f.type = "file"; f.accept = "application/json,.json";
+      f.onchange = function(){
+        var file = f.files && f.files[0];
+        if (!file) return;
+        var fr = new FileReader();
+        fr.onload = function(){
+          try {
+            var data = JSON.parse(fr.result);
+            var incoming = data.progress || data;
+            Object.keys(incoming).forEach(function(k){
+              var a = store[k], b = incoming[k];
+              if (!a || (b.ts || 0) >= (a.ts || 0) || (b.done && !a.done)) store[k] = b;
+            });
+            if (data.at) localStorage.setItem(KEYAT, data.at);
+            saveNow(); render(); paintNow();
+            alert("Imported " + Object.keys(incoming).length + " episode records.");
+          } catch(e){ alert("That file did not parse as progress JSON."); }
+        };
+        fr.readAsText(file);
+      };
+      f.click();
+    } else if (what === "3"){
+      if (confirm("Erase all watch progress on this device? This cannot be undone.")){
+        store = {};
+        try { localStorage.removeItem(KEY); localStorage.removeItem(KEYAT); } catch(e){}
+        render(); paintNow();
+      }
+    }
+  };
+
+  /* another tab (or another window on this device) moved the progress along */
+  window.addEventListener("storage", function(e){
+    if (e.key && e.key !== KEY) return;
+    if (merge(store, load())){ render(); paintNow(); }
+  });
+
+  /* keyboard */
+  document.addEventListener("keydown", function(e){
+    var tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea") return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    switch (e.key){
+      case " ":  if (cur >= 0){ e.preventDefault(); video.paused ? tryPlay() : video.pause(); } break;
+      case "ArrowLeft":  if (cur >= 0){ e.preventDefault(); video.currentTime = Math.max(0, video.currentTime - 10); } break;
+      case "ArrowRight": if (cur >= 0){ e.preventDefault(); video.currentTime = video.currentTime + 10; } break;
+      case "n": case "N": if (here() >= 0 && here() + 1 < EPS.length) play(here() + 1, true); break;
+      case "p": case "P": if (here() > 0) play(here() - 1, true); break;
+      case "f": case "F": if (cur >= 0 && video.requestFullscreen) video.requestFullscreen(); break;
+    }
+  });
+
+  /* ---------- boot ---------- */
+  var start = getCurrent();
+  if (start >= 0){
+    var r0 = rec(start);
+    var finished = !!(r0 && r0.done);
+    if (finished){
+      var n = nextUnwatched(start + 1);
+      queued = (n >= 0) ? n : Math.min(start + 1, EPS.length - 1);
+    } else {
+      queued = start;
+    }
+    shown = EPS[queued][0];
+    document.getElementById("resume").textContent =
+      finished ? "Play " + code(queued) : "Resume " + code(queued);
+    var rq = rec(queued);
+    ph.innerHTML = "<b>" + code(queued) + "</b><span>" +
+      (finished ? "next up after " + code(start)
+                : (rq && rq.t > 30 ? "paused at " + fmt(rq.t)
+                                   : "not started")) +
+      " — press Resume</span>";
+    paintNow();
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
