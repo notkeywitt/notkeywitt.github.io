@@ -53,18 +53,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 }
 .btn:hover{color:var(--ink)}
 .btn.primary{color:var(--ink)}
-#search{
-  font:inherit;letter-spacing:2px;text-align:center;color:var(--ink);
-  background:none;border:0;border-bottom:1px solid var(--line);
-  padding:2px 0;width:180px;
-}
-#search::placeholder{color:var(--faint);letter-spacing:2px}
-#search:focus{outline:none;border-bottom-color:var(--mid)}
-
-/* ---------- overall progress: one hairline ---------- */
-.stats{font-size:12px;letter-spacing:2px;color:var(--faint);margin-bottom:6px}
-.bar{height:1px;background:var(--line);margin-bottom:3vh}
-.bar > i{display:block;height:100%;background:var(--mid)}
+.rule{height:1px;background:var(--line);margin-bottom:3vh}
 
 /* ---------- player ---------- */
 .stage{position:relative;background:#fff}
@@ -144,9 +133,6 @@ h2.picker{
   font-size:16px;color:var(--ink);letter-spacing:1px;margin-bottom:.5em;
 }
 #epMeta p{margin:0}
-#epMeta .credit{
-  font-size:10px;letter-spacing:2px;color:var(--faint);margin-top:1.4em;
-}
 
 footer{
   margin-top:9vh;padding-top:3vh;border-top:1px solid var(--line);
@@ -176,12 +162,9 @@ footer b{font-weight:400;color:var(--mid)}
 
   <div class="tools">
     <button class="btn primary" id="resume">resume</button>
-    <input id="search" type="search" placeholder="s12e04" autocomplete="off" spellcheck="false">
-    <button class="btn" id="menu">progress data</button>
   </div>
 
-  <div class="stats" id="statText">&nbsp;</div>
-  <div class="bar"><i id="statBar"></i></div>
+  <div class="rule"></div>
 
   <div class="stage">
     <video id="video" controls playsinline preload="metadata" style="display:none"></video>
@@ -197,7 +180,6 @@ footer b{font-weight:400;color:var(--mid)}
     <button class="btn" id="prev">prev</button>
     <button class="btn" id="next">next</button>
     <button class="btn" id="toggleDone">mark watched</button>
-    <a class="btn" id="srcLink" href="#" target="_blank" rel="noopener" style="display:none">source</a>
   </div>
 
   <div id="epMeta"></div>
@@ -209,9 +191,9 @@ footer b{font-weight:400;color:var(--mid)}
   <div class="eps" id="eps"></div>
 
   <footer>
-    progress is kept in this browser only &mdash; <b>progress data</b> moves it to another one.<br>
-    <b>space</b> play &middot; <b>&larr; &rarr;</b> seek &middot; <b>n p</b> episode &middot; <b>f</b> fullscreen &middot; <b>right-click</b> an episode to mark it watched.<br>
-    streams come from the source cdn. if one will not start here, <b>source</b> opens it directly.
+    progress is kept in this browser, on this device only.<br>
+    <b>space</b> play &middot; <b>&larr; &rarr;</b> seek &middot; <b>n p</b> episode &middot;
+    <b>f</b> fullscreen &middot; <b>right-click</b> an episode to mark it watched.
   </footer>
 </div>
 
@@ -350,11 +332,9 @@ footer b{font-weight:400;color:var(--mid)}
 
   function fail(what){
     errEl.innerHTML = (what === "library")
-      ? "<b>The hls.js player library did not load.</b> " +
-        "Check the network, then reload. Meanwhile <b>Source&nbsp;&nearr;</b> opens the stream URL directly."
-      : "<b>This stream would not load here (" + what + ").</b> " +
-        "The CDN may require a fresh link, or may block playback from this page. " +
-        "Try <b>Source&nbsp;&nearr;</b> to open the stream URL directly.";
+      ? "<b>the player library did not load.</b> check the network, then reload."
+      : "<b>this stream would not load (" + what + ").</b> " +
+        "the cdn may want a fresh link, or may block playback from this page.";
     errEl.style.display = "block";
   }
 
@@ -380,7 +360,6 @@ footer b{font-weight:400;color:var(--mid)}
     store[key(cur)] = r;
     save();
     paintTile(cur);
-    paintStats();
   }
 
   var tick = null;
@@ -563,18 +542,13 @@ footer b{font-weight:400;color:var(--mid)}
       tiles[i] = b;
       paintTile(i);
     });
-    paintStats();
   }
 
   function paintNow(){
     var t = document.getElementById("nowTitle");
-    var link = document.getElementById("srcLink");
     var i = cur >= 0 ? cur : queued;
-    if (i < 0){ t.textContent = "nothing playing"; link.style.display = "none"; return; }
-    t.innerHTML = code(i) + "<span>season " + EPS[i][0] + ", episode " + EPS[i][1] +
-                  " · " + (i + 1) + " of " + EPS.length + (cur < 0 ? " · queued" : "") + "</span>";
-    link.href = url(i);
-    link.style.display = "";
+    if (i < 0){ t.textContent = "nothing playing"; return; }
+    t.textContent = code(i);
     document.getElementById("toggleDone").textContent =
       (rec(i) && rec(i).done) ? "mark unwatched" : "mark watched";
     document.title = code(i) + " \u2014 this old house";
@@ -594,22 +568,6 @@ footer b{font-weight:400;color:var(--mid)}
       para.textContent = m.s;
       box.appendChild(para);
     }
-    var cr = document.createElement("div");
-    cr.className = "credit";
-    cr.textContent = "episode information via tvmaze";
-    box.appendChild(cr);
-  }
-
-  function paintStats(){
-    var done = 0, started = 0;
-    for (var i=0;i<EPS.length;i++){
-      var r = rec(i);
-      if (r && r.done) done++;
-      else if (r && r.t > 30) started++;
-    }
-    document.getElementById("statText").textContent =
-      done + " of " + EPS.length + " watched" + (started ? " · " + started + " in progress" : "");
-    document.getElementById("statBar").style.width = (done / EPS.length * 100) + "%";
   }
 
   function toggleDone(i){
@@ -620,7 +578,6 @@ footer b{font-weight:400;color:var(--mid)}
     store[key(i)] = r;
     saveNow();
     paintTile(i);
-    paintStats();
     renderSeasons();
     if (i === here()) paintNow();
   }
@@ -643,78 +600,6 @@ footer b{font-weight:400;color:var(--mid)}
     }
     shown = EPS[i][0];
     play(i, true);
-  };
-
-  /* search: s12e04 | 12x4 | 12 4 | 305 (absolute) | 12 (season) */
-  document.getElementById("search").addEventListener("keydown", function(e){
-    if (e.key !== "Enter") return;
-    var q = this.value.trim().toLowerCase();
-    if (!q) return;
-    var m = q.match(/^s?(\d{1,2})\s*(?:e|x|\s|-)\s*(\d{1,2})$/);
-    if (m){
-      var s = +m[1], ep = +m[2];
-      for (var i=0;i<EPS.length;i++){
-        if (EPS[i][0] === s && EPS[i][1] === ep){ shown = s; play(i, true); this.blur(); return; }
-      }
-      return;
-    }
-    var n = q.match(/^#?(\d{1,4})$/);
-    if (n){
-      var v = +n[1];
-      if (v >= 1 && v <= seasons.length && v <= 41 && q.length <= 2){ shown = v; render(); this.blur(); return; }
-      if (v >= 1 && v <= EPS.length){ shown = EPS[v-1][0]; play(v - 1, true); this.blur(); }
-    }
-  });
-
-  /* export / import / reset */
-  document.getElementById("menu").onclick = function(){
-    var what = prompt(
-      "progress data\n\n" +
-      "  1  export progress to a file\n" +
-      "  2  import progress from a file\n" +
-      "  3  erase all progress\n" +
-      "  4  refresh episode titles and descriptions\n\n" +
-      "type a number:", "1");
-    if (what === "1"){
-      var blob = new Blob([JSON.stringify({ v:1, at:localStorage.getItem(KEYAT), progress:store }, null, 1)],
-                          { type:"application/json" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "this-old-house-progress.json";
-      a.click();
-      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
-    } else if (what === "2"){
-      var f = document.createElement("input");
-      f.type = "file"; f.accept = "application/json,.json";
-      f.onchange = function(){
-        var file = f.files && f.files[0];
-        if (!file) return;
-        var fr = new FileReader();
-        fr.onload = function(){
-          try {
-            var data = JSON.parse(fr.result);
-            var incoming = data.progress || data;
-            Object.keys(incoming).forEach(function(k){
-              var a = store[k], b = incoming[k];
-              if (!a || (b.ts || 0) >= (a.ts || 0) || (b.done && !a.done)) store[k] = b;
-            });
-            if (data.at) localStorage.setItem(KEYAT, data.at);
-            saveNow(); render(); paintNow();
-            alert("Imported " + Object.keys(incoming).length + " episode records.");
-          } catch(e){ alert("That file did not parse as progress JSON."); }
-        };
-        fr.readAsText(file);
-      };
-      f.click();
-    } else if (what === "4"){
-      metaFetch(true);
-    } else if (what === "3"){
-      if (confirm("Erase all watch progress on this device? This cannot be undone.")){
-        store = {};
-        try { localStorage.removeItem(KEY); localStorage.removeItem(KEYAT); } catch(e){}
-        render(); paintNow();
-      }
-    }
   };
 
   /* another tab (or another window on this device) moved the progress along */
