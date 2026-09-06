@@ -126,6 +126,19 @@ h2{
         transform:scaleX(0);transform-origin:left;transition:transform .3s linear}
 .check{display:none}
 
+/* ---------- metadata for the playing episode ---------- */
+#epMeta{
+  max-width:56ch;margin:3.5vh auto 0;font-size:13px;line-height:1.9;
+  color:var(--mid);letter-spacing:.3px;
+}
+#epMeta .epname{
+  font-size:16px;color:var(--ink);letter-spacing:1px;margin-bottom:.5em;
+}
+#epMeta p{margin:0}
+#epMeta .credit{
+  font-size:10px;letter-spacing:2px;color:var(--faint);margin-top:1.4em;
+}
+
 footer{
   margin-top:9vh;padding-top:3vh;border-top:1px solid var(--line);
   font-size:11px;letter-spacing:1px;line-height:2.2;color:var(--faint);
@@ -177,6 +190,8 @@ footer b{font-weight:400;color:var(--mid)}
     <button class="btn" id="toggleDone">mark watched</button>
     <a class="btn" id="srcLink" href="#" target="_blank" rel="noopener" style="display:none">source</a>
   </div>
+
+  <div id="epMeta"></div>
 
   <h2>seasons</h2>
   <div class="seasons" id="seasons"></div>
@@ -382,6 +397,86 @@ footer b{font-weight:400;color:var(--mid)}
     if (document.hidden){ remember(true); saveNow(); }
   });
 
+  /* ---------- episode metadata ----------------------------------------
+     Titles and descriptions are not stored in this repo. The page asks
+     tvmaze for them once, caches the answer for a month, and shows what
+     comes back. No metadata simply means no metadata - nothing else on
+     the page depends on it.                                          */
+  var META_KEY = "toh.meta.v1";
+  var META_URL = "https://api.tvmaze.com/shows/1802/episodes";   /* 1802 = this old house */
+  var META_TTL = 30 * 24 * 3600 * 1000;
+  var meta = null;
+
+  function metaLoad(){
+    try { return JSON.parse(localStorage.getItem(META_KEY)); } catch(e){ return null; }
+  }
+
+  /* summaries arrive as html - take the text only, and never parse it into
+     this document (DOMParser neither runs scripts nor loads resources) */
+  function textOf(html){
+    if (!html) return "";
+    try {
+      var doc = new DOMParser().parseFromString(String(html), "text/html");
+      return (doc.body.textContent || "").replace(/\s+/g, " ").trim();
+    } catch(e){ return ""; }
+  }
+
+  /* a season's project is whatever its episode titles all begin with:
+     "The Westwood House - 1", "... - 2" -> "The Westwood House".
+     A season that ran several projects has no common prefix, and gets
+     no title - which is the honest answer for those years.           */
+  function commonPrefix(names){
+    if (!names.length) return "";
+    var pre = names[0];
+    for (var i = 1; i < names.length; i++){
+      var b = names[i], j = 0;
+      while (j < pre.length && j < b.length && pre.charAt(j) === b.charAt(j)) j++;
+      pre = pre.slice(0, j);
+      if (!pre) return "";
+    }
+    return pre;
+  }
+  function seasonTitle(names){
+    var t = commonPrefix(names).trim();
+    t = t.replace(/[\s\-\u2013\u2014:,]+$/, "")
+         .replace(/\s+(part|pt\.?|episode|ep\.?|no\.?)$/i, "")
+         .replace(/[\s\-\u2013\u2014:,]+$/, "");
+    return t.length >= 4 ? t : "";
+  }
+
+  function metaBuild(list){
+    var eps = {}, names = {}, seasons = {};
+    list.forEach(function(e){
+      if (!e || typeof e.season !== "number" || typeof e.number !== "number") return;
+      eps[e.season + "-" + e.number] = { n: e.name || "", s: textOf(e.summary) };
+      (names[e.season] = names[e.season] || []).push(e.name || "");
+    });
+    Object.keys(names).forEach(function(sn){
+      var t = seasonTitle(names[sn].filter(Boolean));
+      if (t) seasons[sn] = t;
+    });
+    return { ts: Date.now(), eps: eps, seasons: seasons };
+  }
+
+  function metaFetch(force){
+    var cached = metaLoad();
+    if (cached && cached.eps) meta = cached;                 /* show what we have */
+    if (!force && cached && (Date.now() - (cached.ts || 0)) < META_TTL) return;
+    if (!window.fetch) return;
+    fetch(META_URL, { mode: "cors" })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(list){
+        if (!Array.isArray(list) || !list.length) return;
+        meta = metaBuild(list);
+        try { localStorage.setItem(META_KEY, JSON.stringify(meta)); } catch(e){}
+        render(); paintNow();
+      })
+      .catch(function(){});                                  /* offline - stay quiet */
+  }
+
+  function epMeta(i){ return (meta && meta.eps) ? meta.eps[key(i)] : null; }
+  function seasonName(sn){ return (meta && meta.seasons) ? (meta.seasons[sn] || "") : ""; }
+
   /* ---------- rendering ---------- */
   var seasons = [];
   for (var i=0;i<EPS.length;i++) if (seasons.indexOf(EPS[i][0]) === -1) seasons.push(EPS[i][0]);
@@ -409,7 +504,9 @@ footer b{font-weight:400;color:var(--mid)}
       var b = document.createElement("button");
       b.className = "season" + (s === shown ? " sel" : "") + (seasonDone(s) ? " all" : "");
       b.textContent = s;
-      b.title = "season " + s + (seasonDone(s) ? " \u2014 fully watched" : "");
+      var sn = seasonName(s);
+      b.title = "season " + s + (sn ? " \u00b7 " + sn : "") +
+                (seasonDone(s) ? " \u2014 fully watched" : "");
       b.onclick = function(){ shown = s; render(); };
       seasonsEl.appendChild(b);
     });
@@ -440,7 +537,9 @@ footer b{font-weight:400;color:var(--mid)}
     var list = [];
     for (var i=0;i<EPS.length;i++) if (EPS[i][0] === shown) list.push(i);
     var doneCount = list.filter(function(i){ var r = rec(i); return r && r.done; }).length;
-    epsHead.textContent = "season " + shown + " \u2014 " + doneCount + " of " + list.length + " watched";
+    var sn = seasonName(shown);
+    epsHead.textContent = "season " + shown + (sn ? " \u00b7 " + sn : "") +
+                          " \u2014 " + doneCount + " of " + list.length + " watched";
 
     epsEl.innerHTML = "";
     tiles = {};
@@ -449,6 +548,8 @@ footer b{font-weight:400;color:var(--mid)}
       b.innerHTML = '<span class="code"></span><span class="state"></span>' +
                     '<span class="check"></span><i class="pb"></i>';
       b.querySelector(".code").textContent = code(i);
+      var em = epMeta(i);
+      if (em && em.n) b.title = em.n;
       b.onclick = function(){ play(i, true); };
       b.oncontextmenu = function(e){ e.preventDefault(); toggleDone(i); };
       epsEl.appendChild(b);
@@ -470,6 +571,26 @@ footer b{font-weight:400;color:var(--mid)}
     document.getElementById("toggleDone").textContent =
       (rec(i) && rec(i).done) ? "mark unwatched" : "mark watched";
     document.title = code(i) + " \u2014 this old house";
+
+    var box = document.getElementById("epMeta");
+    box.textContent = "";
+    var m = epMeta(i);
+    if (!m || (!m.n && !m.s)) return;
+    if (m.n){
+      var h = document.createElement("div");
+      h.className = "epname";
+      h.textContent = m.n;                  /* text only - never innerHTML */
+      box.appendChild(h);
+    }
+    if (m.s){
+      var para = document.createElement("p");
+      para.textContent = m.s;
+      box.appendChild(para);
+    }
+    var cr = document.createElement("div");
+    cr.className = "credit";
+    cr.textContent = "episode information via tvmaze";
+    box.appendChild(cr);
   }
 
   function paintStats(){
@@ -542,7 +663,8 @@ footer b{font-weight:400;color:var(--mid)}
       "progress data\n\n" +
       "  1  export progress to a file\n" +
       "  2  import progress from a file\n" +
-      "  3  erase all progress\n\n" +
+      "  3  erase all progress\n" +
+      "  4  refresh episode titles and descriptions\n\n" +
       "type a number:", "1");
     if (what === "1"){
       var blob = new Blob([JSON.stringify({ v:1, at:localStorage.getItem(KEYAT), progress:store }, null, 1)],
@@ -575,6 +697,8 @@ footer b{font-weight:400;color:var(--mid)}
         fr.readAsText(file);
       };
       f.click();
+    } else if (what === "4"){
+      metaFetch(true);
     } else if (what === "3"){
       if (confirm("Erase all watch progress on this device? This cannot be undone.")){
         store = {};
@@ -629,6 +753,7 @@ footer b{font-weight:400;color:var(--mid)}
   }
 
   render();
+  metaFetch(false);
 })();
 </script>
 </body>
