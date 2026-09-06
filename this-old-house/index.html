@@ -2,157 +2,192 @@
 <html lang="en-US">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>This Old House &mdash; player</title>
+<title>this old house</title>
 <link rel="icon" href="../favicon.png">
 <style>
 :root{
-  --bg:#14110f; --panel:#1d1916; --panel-2:#262019; --line:#332b24;
-  --text:#efe9e2; --dim:#a2968a; --faint:#6f645b;
-  --accent:#d59a3c; --accent-fg:#14110f; --done:#5f8a55;
+  --ink:#000000d9;      /* body text          */
+  --mid:#00000075;      /* secondary text     */
+  --faint:#00000038;    /* watched, disabled  */
+  --line:#0000001a;     /* hairlines          */
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
-  background:var(--bg); color:var(--text);
-  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica,sans-serif;
+  font-family:Arial, Helvetica, sans-serif;
+  font-weight:200;
+  font-style:normal;
+  font-size:15px;
+  line-height:1.6;
+  color:var(--ink);
+  background-color:rgb(255,255,255);
+  text-align:center;
   -webkit-font-smoothing:antialiased;
 }
-a{color:var(--accent)}
-.wrap{max-width:1080px;margin:0 auto;padding:0 16px 64px}
+.wrap{max-width:940px;margin:0 auto;padding:0 5vw 12vh}
+a{color:inherit;text-decoration:none}
 
-/* ---------- header ---------- */
-header{
-  position:sticky;top:0;z-index:30;background:rgba(20,17,15,.94);
-  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+/* ---------- masthead: the home page's title / tagline pairing ---------- */
+.mast{padding:6vh 0 0}
+.mast .up{font-size:13px;letter-spacing:2px;color:var(--faint);transition:color .3s linear}
+.mast .up:hover{color:var(--mid)}
+h1{
+  font-size:3vw;font-weight:200;letter-spacing:2px;
+  margin:.4em 0 .1em;color:var(--ink);
 }
-.hrow{max-width:1080px;margin:0 auto;padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.brand{font-weight:700;letter-spacing:.5px;margin-right:auto;white-space:nowrap}
-.brand small{display:block;font-weight:400;color:var(--faint);letter-spacing:1.5px;font-size:10px;text-transform:uppercase}
-#search{
-  flex:1 1 180px;min-width:140px;background:var(--panel-2);border:1px solid var(--line);
-  color:var(--text);border-radius:8px;padding:8px 10px;font-size:14px;
+.tagline{font-size:1.5vw;font-weight:lighter;letter-spacing:2px;color:var(--mid)}
+
+/* ---------- one quiet line of controls ---------- */
+.tools{
+  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;
+  gap:0 22px;margin:5vh 0 3vh;font-size:13px;letter-spacing:2px;
 }
-#search:focus{outline:none;border-color:var(--accent)}
-button{font:inherit;cursor:pointer}
+button{font:inherit;cursor:pointer;color:inherit}
 .btn{
-  background:var(--panel-2);border:1px solid var(--line);color:var(--text);
-  border-radius:8px;padding:8px 12px;font-size:13px;white-space:nowrap;
+  background:none;border:0;padding:0;letter-spacing:2px;
+  color:var(--mid);transition:color .3s linear;
 }
-.btn:hover{border-color:var(--accent);color:var(--accent)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
-.btn.primary:hover{color:var(--accent-fg);filter:brightness(1.08)}
+.btn:hover{color:var(--ink)}
+.btn.primary{color:var(--ink)}
+#search{
+  font:inherit;letter-spacing:2px;text-align:center;color:var(--ink);
+  background:none;border:0;border-bottom:1px solid var(--line);
+  padding:2px 0;width:180px;
+}
+#search::placeholder{color:var(--faint);letter-spacing:2px}
+#search:focus{outline:none;border-bottom-color:var(--mid)}
 
-/* ---------- overall progress ---------- */
-.stats{display:flex;align-items:center;gap:10px;padding:12px 0 4px;color:var(--dim);font-size:12px}
-.bar{flex:1;height:4px;background:var(--panel-2);border-radius:3px;overflow:hidden}
-.bar > i{display:block;height:100%;background:var(--accent)}
+/* ---------- overall progress: one hairline ---------- */
+.stats{font-size:12px;letter-spacing:2px;color:var(--faint);margin-bottom:6px}
+.bar{height:1px;background:var(--line);margin-bottom:3vh}
+.bar > i{display:block;height:100%;background:var(--mid)}
 
 /* ---------- player ---------- */
-.stage{margin:14px 0 6px;background:#000;border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative}
+.stage{position:relative;background:#fff}
 .stage video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 .placeholder{
-  aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:8px;color:var(--faint);text-align:center;padding:20px;
+  display:flex;flex-direction:column;justify-content:center;
+  gap:4px;border:1px solid var(--line);color:var(--faint);
+  font-size:13px;letter-spacing:2px;padding:9vh 20px;
 }
-.placeholder b{color:var(--dim);font-weight:600}
+.placeholder b{display:block;color:var(--mid);font-weight:200;font-size:18px}
 #err{
-  position:absolute;left:0;right:0;bottom:0;background:rgba(20,17,15,.95);
-  border-top:1px solid var(--line);padding:12px 14px;font-size:13px;color:var(--dim);display:none;
+  display:none;padding:14px 4px 0;font-size:12px;
+  letter-spacing:1px;line-height:1.8;color:var(--mid);
 }
-#err b{color:#e0a0a0}
+#err b{font-weight:400;color:var(--ink)}
 
-.nowbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 2px 2px}
-.nowtitle{font-size:17px;font-weight:600;margin-right:auto}
-.nowtitle span{color:var(--faint);font-weight:400;font-size:13px;margin-left:8px}
+.nowbar{
+  display:flex;justify-content:center;align-items:baseline;flex-wrap:wrap;
+  gap:0 22px;padding:3vh 0 0;font-size:13px;letter-spacing:2px;
+}
+.nowtitle{color:var(--ink)}
+.nowtitle span{color:var(--faint);margin-left:14px}
 
 /* ---------- seasons ---------- */
-h2{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--faint);
-   margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
-.seasons{display:flex;flex-wrap:wrap;gap:6px}
+h2{
+  font-size:12px;font-weight:200;letter-spacing:2px;color:var(--faint);
+  margin:7vh 0 2.5vh;padding-bottom:8px;border-bottom:1px solid var(--line);
+}
+.seasons{
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:0 18px;font-size:13px;letter-spacing:2px;
+}
 .season{
-  background:var(--panel);border:1px solid var(--line);color:var(--dim);
-  border-radius:7px;padding:6px 9px;font-size:13px;min-width:42px;position:relative;
+  background:none;border:0;padding:2px 0;color:var(--mid);
+  transition:color .3s linear;
 }
-.season:hover{color:var(--text)}
-.season.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:700}
-.season.all{color:var(--done)}
-.season.sel.all{color:var(--accent-fg)}
+.season:hover{color:var(--ink)}
+.season.all{color:var(--faint)}       /* season finished - falls back */
+.season.sel,.season.sel.all{color:var(--ink);border-bottom:1px solid var(--ink)}
 
-/* ---------- episode grid ---------- */
-.eps{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
+/* ---------- episodes ---------- */
+.eps{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));
+  gap:3.5vh 10px;
+}
 .ep{
-  text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--text);
-  border-radius:9px;padding:10px 11px 9px;position:relative;overflow:hidden;
+  background:none;border:0;padding:0 0 7px;position:relative;
+  color:var(--mid);transition:color .3s linear;
 }
-.ep:hover{border-color:var(--accent)}
-.ep .code{font-size:13px;font-weight:600}
-.ep .state{display:block;font-size:11px;color:var(--faint);margin-top:3px;min-height:15px}
-.ep.done .code{color:var(--done)}
-.ep.now{border-color:var(--accent);background:var(--panel-2)}
-.ep.now .code{color:var(--accent)}
-.ep .pb{position:absolute;left:0;bottom:0;height:3px;background:var(--accent);width:0}
-.ep.done .pb{background:var(--done)}
-.check{position:absolute;top:8px;right:9px;font-size:12px;color:var(--done)}
+.ep:hover{color:var(--ink)}
+.ep .code{font-size:14px;letter-spacing:2px}
+.ep .state{
+  display:block;font-size:10px;letter-spacing:1px;color:var(--faint);
+  margin-top:2px;min-height:16px;
+}
+.ep.done{color:var(--faint)}          /* watched recedes             */
+.ep.now{color:var(--ink)}             /* current stands out in black */
+.ep.now .code{border-bottom:1px solid var(--ink);padding-bottom:2px}
+.ep .pb{position:absolute;left:26%;right:26%;bottom:0;height:1px;background:var(--faint);
+        transform:scaleX(0);transform-origin:left;transition:transform .3s linear}
+.check{display:none}
 
-footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);
-  color:var(--faint);font-size:12px;line-height:1.7}
-footer a{color:var(--dim)}
-@media (max-width:520px){
-  .eps{grid-template-columns:repeat(auto-fill,minmax(108px,1fr))}
-  .nowtitle{font-size:15px;width:100%}
+footer{
+  margin-top:9vh;padding-top:3vh;border-top:1px solid var(--line);
+  font-size:11px;letter-spacing:1px;line-height:2.2;color:var(--faint);
+}
+footer b{font-weight:400;color:var(--mid)}
+
+@media (max-width:700px){
+  h1{font-size:7vw}
+  .tagline{font-size:3.4vw}
+  .eps{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+  .tools,.nowbar{gap:0 16px}
+  .nowtitle{width:100%;margin-bottom:4px}
+  .nowtitle span{display:block;margin:0}
 }
 </style>
 </head>
+
 <body>
-
-<header>
-  <div class="hrow">
-    <div class="brand">This Old House<small>1979 &ndash; 2020 &middot; 41 seasons</small></div>
-    <input id="search" type="search" placeholder="Jump to&hellip;  s12e04, 12x4, 305" autocomplete="off" spellcheck="false">
-    <button class="btn primary" id="resume">Resume</button>
-    <button class="btn" id="menu" title="Progress data">&hellip;</button>
-  </div>
-</header>
-
 <div class="wrap">
 
-  <div class="stats">
-    <span id="statText">&nbsp;</span>
-    <span class="bar"><i id="statBar"></i></span>
+  <div class="mast">
+    <a class="up" href="../index.html">keillor witt</a>
+    <h1>this old house</h1>
+    <div class="tagline">41 seasons &middot; 1041 episodes</div>
   </div>
+
+  <div class="tools">
+    <button class="btn primary" id="resume">resume</button>
+    <input id="search" type="search" placeholder="s12e04" autocomplete="off" spellcheck="false">
+    <button class="btn" id="menu">progress data</button>
+  </div>
+
+  <div class="stats" id="statText">&nbsp;</div>
+  <div class="bar"><i id="statBar"></i></div>
 
   <div class="stage">
     <video id="video" controls playsinline preload="metadata" style="display:none"></video>
     <div class="placeholder" id="placeholder">
-      <b>Pick an episode below</b>
-      <span>or press Resume to pick up where you left off</span>
+      <b>pick an episode</b>
+      <span>or resume where you left off</span>
     </div>
     <div id="err"></div>
   </div>
 
   <div class="nowbar">
-    <div class="nowtitle" id="nowTitle">Nothing playing</div>
-    <button class="btn" id="prev">&larr; Prev</button>
-    <button class="btn" id="next">Next &rarr;</button>
-    <button class="btn" id="toggleDone">Mark watched</button>
-    <a class="btn" id="srcLink" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none">Source&nbsp;&nearr;</a>
+    <div class="nowtitle" id="nowTitle">nothing playing</div>
+    <button class="btn" id="prev">prev</button>
+    <button class="btn" id="next">next</button>
+    <button class="btn" id="toggleDone">mark watched</button>
+    <a class="btn" id="srcLink" href="#" target="_blank" rel="noopener" style="display:none">source</a>
   </div>
 
-  <h2>Seasons</h2>
+  <h2>seasons</h2>
   <div class="seasons" id="seasons"></div>
 
-  <h2 id="epsHead">Episodes</h2>
+  <h2 id="epsHead">episodes</h2>
   <div class="eps" id="eps"></div>
 
   <footer>
-    Progress is saved in this browser only (localStorage), per device. Use
-    <b>&hellip; &rarr; Export</b> to move it to another browser.<br>
-    Keys: <b>space</b> play/pause &middot; <b>&larr;/&rarr;</b> seek 10s &middot;
-    <b>N/P</b> next/previous episode &middot; <b>F</b> fullscreen.<br>
-    Streams come from the source CDN. If a video will not start here, use
-    <b>Source&nbsp;&nearr;</b> to open the stream URL directly.
+    progress is kept in this browser only &mdash; <b>progress data</b> moves it to another one.<br>
+    <b>space</b> play &middot; <b>&larr; &rarr;</b> seek &middot; <b>n p</b> episode &middot; <b>f</b> fullscreen &middot; <b>right-click</b> an episode to mark it watched.<br>
+    streams come from the source cdn. if one will not start here, <b>source</b> opens it directly.
   </footer>
 </div>
 
@@ -374,7 +409,7 @@ footer a{color:var(--dim)}
       var b = document.createElement("button");
       b.className = "season" + (s === shown ? " sel" : "") + (seasonDone(s) ? " all" : "");
       b.textContent = s;
-      b.title = "Season " + s + (seasonDone(s) ? " — fully watched" : "");
+      b.title = "season " + s + (seasonDone(s) ? " \u2014 fully watched" : "");
       b.onclick = function(){ shown = s; render(); };
       seasonsEl.appendChild(b);
     });
@@ -393,10 +428,11 @@ footer a{color:var(--dim)}
     else if (r && r.t > 30) state = "at " + fmt(r.t);
     b.querySelector(".state").textContent =
       (i === cur) ? (state ? "playing · " + state : "playing")
-                  : (i === queued && cur < 0) ? (state ? "next up · " + state : "next up")
+                  : (i === queued && cur < 0) ? (state ? "next \u00b7 " + state : "next")
                   : state;
-    b.querySelector(".pb").style.width = (p * 100) + "%";
-    b.querySelector(".check").textContent = (r && r.done) ? "✓" : "";
+    /* the bar marks part-watched only - "watched" already says the rest */
+    b.querySelector(".pb").style.transform = "scaleX(" + ((r && r.done) ? 0 : p) + ")";
+    b.querySelector(".check").textContent = "";
   }
 
   function render(){
@@ -404,7 +440,7 @@ footer a{color:var(--dim)}
     var list = [];
     for (var i=0;i<EPS.length;i++) if (EPS[i][0] === shown) list.push(i);
     var doneCount = list.filter(function(i){ var r = rec(i); return r && r.done; }).length;
-    epsHead.textContent = "Season " + shown + " — " + doneCount + " of " + list.length + " watched";
+    epsHead.textContent = "season " + shown + " \u2014 " + doneCount + " of " + list.length + " watched";
 
     epsEl.innerHTML = "";
     tiles = {};
@@ -426,14 +462,14 @@ footer a{color:var(--dim)}
     var t = document.getElementById("nowTitle");
     var link = document.getElementById("srcLink");
     var i = cur >= 0 ? cur : queued;
-    if (i < 0){ t.textContent = "Nothing playing"; link.style.display = "none"; return; }
-    t.innerHTML = code(i) + "<span>Season " + EPS[i][0] + ", episode " + EPS[i][1] +
+    if (i < 0){ t.textContent = "nothing playing"; link.style.display = "none"; return; }
+    t.innerHTML = code(i) + "<span>season " + EPS[i][0] + ", episode " + EPS[i][1] +
                   " · " + (i + 1) + " of " + EPS.length + (cur < 0 ? " · queued" : "") + "</span>";
     link.href = url(i);
     link.style.display = "";
     document.getElementById("toggleDone").textContent =
-      (rec(i) && rec(i).done) ? "Mark unwatched" : "Mark watched";
-    document.title = code(i) + " — This Old House";
+      (rec(i) && rec(i).done) ? "mark unwatched" : "mark watched";
+    document.title = code(i) + " \u2014 this old house";
   }
 
   function paintStats(){
@@ -503,11 +539,11 @@ footer a{color:var(--dim)}
   /* export / import / reset */
   document.getElementById("menu").onclick = function(){
     var what = prompt(
-      "Progress data\n\n" +
-      "  1  Export progress to a file\n" +
-      "  2  Import progress from a file\n" +
-      "  3  Erase all progress\n\n" +
-      "Type a number:", "1");
+      "progress data\n\n" +
+      "  1  export progress to a file\n" +
+      "  2  import progress from a file\n" +
+      "  3  erase all progress\n\n" +
+      "type a number:", "1");
     if (what === "1"){
       var blob = new Blob([JSON.stringify({ v:1, at:localStorage.getItem(KEYAT), progress:store }, null, 1)],
                           { type:"application/json" });
@@ -582,13 +618,13 @@ footer a{color:var(--dim)}
     }
     shown = EPS[queued][0];
     document.getElementById("resume").textContent =
-      finished ? "Play " + code(queued) : "Resume " + code(queued);
+      finished ? "play " + code(queued) : "resume " + code(queued);
     var rq = rec(queued);
     ph.innerHTML = "<b>" + code(queued) + "</b><span>" +
-      (finished ? "next up after " + code(start)
+      (finished ? "next after " + code(start)
                 : (rq && rq.t > 30 ? "paused at " + fmt(rq.t)
                                    : "not started")) +
-      " — press Resume</span>";
+      " \u2014 press resume</span>";
     paintNow();
   }
 
