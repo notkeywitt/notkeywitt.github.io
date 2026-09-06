@@ -9,7 +9,7 @@ do not hand-edit.** Run `node scripts/session.mjs board --write`, or let
 
 | Session | Branch | Last active | Commits | Next step |
 |---|---|---|---|---|
-| [personal-projects-setup](.claude/sessions/2026-09-06-personal-projects-setup.md) | `claude/personal-projects-setup-8539q8` | 0m ago | 0 | Port the non-Ascent Claude workflow into this repo for personal projects |
+| [personal-projects-setup](.claude/sessions/2026-09-06-personal-projects-setup.md) | `claude/personal-projects-setup-8539q8` | 0m ago | 1 | confirm what 'caveman' names — the Write-like-this block is the assumption — th… |
 
 ## Shipped
 
