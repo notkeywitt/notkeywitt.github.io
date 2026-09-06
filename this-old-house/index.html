@@ -13,6 +13,7 @@
   --mid:#00000075;      /* secondary text     */
   --faint:#00000038;    /* watched, disabled  */
   --line:#0000001a;     /* hairlines          */
+  color-scheme:light;   /* keep native controls light-themed */
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -87,22 +88,30 @@ button{font:inherit;cursor:pointer;color:inherit}
 .nowtitle{color:var(--ink)}
 .nowtitle span{color:var(--faint);margin-left:14px}
 
-/* ---------- seasons ---------- */
+/* ---------- season picker ---------- */
 h2{
   font-size:12px;font-weight:200;letter-spacing:2px;color:var(--faint);
   margin:7vh 0 2.5vh;padding-bottom:8px;border-bottom:1px solid var(--line);
 }
-.seasons{
-  display:flex;flex-wrap:wrap;justify-content:center;
-  gap:0 18px;font-size:13px;letter-spacing:2px;
+h2.picker{
+  display:flex;justify-content:center;align-items:baseline;
+  flex-wrap:wrap;gap:0 14px;
 }
-.season{
-  background:none;border:0;padding:2px 0;color:var(--mid);
+.selectWrap{position:relative;display:inline-block}
+.selectWrap::after{                   /* the only chrome the select gets */
+  content:"";position:absolute;right:2px;top:.55em;pointer-events:none;
+  border-left:3px solid transparent;border-right:3px solid transparent;
+  border-top:4px solid var(--faint);
+}
+#seasons{
+  font:inherit;font-size:12px;font-weight:200;letter-spacing:2px;
+  color:var(--mid);background:none;border:0;border-radius:0;
+  padding:0 16px 2px 0;cursor:pointer;
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
   transition:color .3s linear;
 }
-.season:hover{color:var(--ink)}
-.season.all{color:var(--faint)}       /* season finished - falls back */
-.season.sel,.season.sel.all{color:var(--ink);border-bottom:1px solid var(--ink)}
+#seasons:hover{color:var(--ink)}
+#seasons:focus{outline:none;color:var(--ink)}
 
 /* ---------- episodes ---------- */
 .eps{
@@ -193,10 +202,10 @@ footer b{font-weight:400;color:var(--mid)}
 
   <div id="epMeta"></div>
 
-  <h2>seasons</h2>
-  <div class="seasons" id="seasons"></div>
-
-  <h2 id="epsHead">episodes</h2>
+  <h2 class="picker">
+    <span class="selectWrap"><select id="seasons" aria-label="season"></select></span>
+    <span id="epsHead"></span>
+  </h2>
   <div class="eps" id="eps"></div>
 
   <footer>
@@ -501,15 +510,15 @@ footer b{font-weight:400;color:var(--mid)}
   function renderSeasons(){
     seasonsEl.innerHTML = "";
     seasons.forEach(function(s){
-      var b = document.createElement("button");
-      b.className = "season" + (s === shown ? " sel" : "") + (seasonDone(s) ? " all" : "");
-      b.textContent = s;
+      var o = document.createElement("option");
       var sn = seasonName(s);
-      b.title = "season " + s + (sn ? " \u00b7 " + sn : "") +
-                (seasonDone(s) ? " \u2014 fully watched" : "");
-      b.onclick = function(){ shown = s; render(); };
-      seasonsEl.appendChild(b);
+      o.value = s;
+      o.textContent = "season " + s + (sn ? " \u00b7 " + sn : "") +
+                      (seasonDone(s) ? " \u00b7 watched" : "");
+      if (s === shown) o.selected = true;
+      seasonsEl.appendChild(o);
     });
+    seasonsEl.value = String(shown);
   }
 
   function here(){ return cur >= 0 ? cur : queued; }
@@ -537,9 +546,7 @@ footer b{font-weight:400;color:var(--mid)}
     var list = [];
     for (var i=0;i<EPS.length;i++) if (EPS[i][0] === shown) list.push(i);
     var doneCount = list.filter(function(i){ var r = rec(i); return r && r.done; }).length;
-    var sn = seasonName(shown);
-    epsHead.textContent = "season " + shown + (sn ? " \u00b7 " + sn : "") +
-                          " \u2014 " + doneCount + " of " + list.length + " watched";
+    epsHead.textContent = doneCount + " of " + list.length + " watched";
 
     epsEl.innerHTML = "";
     tiles = {};
@@ -619,6 +626,8 @@ footer b{font-weight:400;color:var(--mid)}
   }
 
   /* ---------- controls ---------- */
+  seasonsEl.onchange = function(){ shown = +this.value; render(); };
+
   document.getElementById("prev").onclick = function(){ var i = here(); if (i > 0) play(i - 1, true); };
   document.getElementById("next").onclick = function(){ var i = here(); if (i >= 0 && i + 1 < EPS.length) play(i + 1, true); };
   document.getElementById("toggleDone").onclick = function(){ var i = here(); if (i >= 0) toggleDone(i); };
