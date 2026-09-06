@@ -163,6 +163,28 @@ li > img {
 }
 
 /* Mobile */
+#floor {
+	position: fixed;
+	bottom: 4vh;
+	left: 0;
+	width: 100%;
+	text-align: center;
+	background-color: #ffffff00;
+}
+
+#floor a {
+	font-size: 1.5vw;
+	font-weight: lighter;
+	letter-spacing: 2px;
+	text-decoration: none;
+	text-transform: lowercase;
+}
+
+#floor a:hover {
+	color: #8db6a7b6;
+	cursor: pointer;
+}
+
 @media (max-width: 700px) {
 #top{
 	padding-bottom: 25vw;
@@ -219,8 +241,8 @@ li > img {
 	min-width: 0;
 }
 
-
-
+#floor a {
+	font-size: 3.4vw;
 }
 
-
+}
