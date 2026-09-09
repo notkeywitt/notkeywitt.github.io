@@ -6,8 +6,9 @@
  * moves to articles/pdf/ so the page can link back to the original.
  *
  * Two outside programs do the reading, both free and offline:
- *   pdftotext  (poppler-utils)  - pulls the text layer if the PDF has one
- *   pdftoppm + tesseract        - OCRs the pages when it does not
+ *   pdftoppm (poppler-utils)    - renders each page to a 300dpi image
+ *   tesseract                   - reads the images
+ * pdftotext, from the same package, is the --text-layer shortcut only.
  *
  * Everything after that is heuristics in this file. OCR returns a wall of
  * text; it has no idea what a headline is. The rules below guess, and they
@@ -20,7 +21,7 @@
  *
  *   node scripts/article.mjs                 process every PDF in inbox/
  *   node scripts/article.mjs some/file.pdf   process one file, anywhere
- *   node scripts/article.mjs --force-ocr     ignore any text layer, always OCR
+ *   node scripts/article.mjs --text-layer    trust a digital PDF's own text, skip OCR
  *   node scripts/article.mjs --index         rebuild the list page only
  *
  * Local setup: brew install tesseract poppler          (macOS)
@@ -69,9 +70,17 @@ const words = (s) => (String(s).match(/[A-Za-z]{2,}/g) || []).length;
 /**
  * Returns { text, how }. Pages are separated by a form feed, which is what
  * the running-head rule below keys off.
+ *
+ * OCR is the default even when the PDF carries a text layer, because a text
+ * layer records the order the typesetter WROTE the text, not the order a
+ * person READS it. On a two-column journal page those differ: pdftotext can
+ * hand back section headings pages away from their sections. Tesseract works
+ * from the image, so it sees two columns and reads down one then the other.
+ * On a clean single-column PDF the two agree word for word, which is what
+ * --text-layer is for when you want the seconds back.
  */
-function readPdf(file, forceOcr) {
-  if (!forceOcr) {
+function readPdf(file, useTextLayer) {
+  if (useTextLayer) {
     const direct = run("pdftotext", ["-q", "-eol", "unix", file, "-"]);
     if (words(direct) >= TEXT_LAYER_MIN_WORDS) return { text: direct, how: "text layer" };
   }
@@ -156,7 +165,11 @@ function chunk(lines) {
     const breaks =
       prev &&
       ((/[.!?]["'”’)]?$/.test(prev) && /^["'“‘]?[A-Z]/.test(line)) ||
-        (prev.length < 70 && !/[.!?,;:]$/.test(prev) && line.length >= DEWRAPPED) ||
+        (prev.length < 70 &&
+          !/[.!?,;:]$/.test(prev) &&
+          line.length >= 60 &&
+          line.length > prev.length * 1.5) ||
+        /^\d{1,2}[.)]\s+\S/.test(line) ||
         /^by[\s:]/i.test(line) ||
         (allCaps(prev) && !allCaps(line)));
     if (breaks) groups.push([line]);
@@ -196,8 +209,15 @@ function blocksOf(text) {
       lines
         .reduce((acc, line) => {
           if (!acc) return line;
-          const hyphenated = /[a-z]-$/.test(acc) && /^[a-z]/.test(line);
-          return hyphenated ? acc.slice(0, -1) + line : acc + " " + line;
+          /* A word the typesetter broke over a line rejoins with no space.
+             "bud-" + "get" loses the hyphen; "trial-" + "and-error" keeps it,
+             because a hyphen already inside the incoming word means the first
+             one was the author's, not the line break's. */
+          if (/[a-z]-$/.test(acc) && /^[a-z]/.test(line)) {
+            const compound = /-/.test(line.split(" ")[0]);
+            return compound ? acc + line : acc.slice(0, -1) + line;
+          }
+          return acc + " " + line;
         }, "")
         .replace(/\s+/g, " ")
         .trim(),
@@ -210,7 +230,13 @@ function mergeSplitParagraphs(blocks) {
   const out = [];
   for (const b of blocks) {
     const prev = out[out.length - 1];
-    const runsOn = prev && prev.length > 60 && !/[.!?"'”’)]$/.test(prev) && /^[a-z0-9,;]/.test(b);
+    const numberedHeading = /^\d{1,2}[.)]\s+[A-Z]/.test(b);
+    const runsOn =
+      prev &&
+      !numberedHeading &&
+      prev.length > 60 &&
+      !/[.!?"'”’)]$/.test(prev) &&
+      /^[a-z0-9,;]/.test(b);
     if (runsOn) out[out.length - 1] = prev + " " + b;
     else out.push(b);
   }
@@ -221,6 +247,16 @@ function mergeSplitParagraphs(blocks) {
  *  character no printed sentence uses is one of those, not a sentence. */
 const isJunk = (b) =>
   b.length < 20 && (/[^\w\s.,'"‘’“”:;!?()\[\]&%$#@/-]/.test(b) || (b.match(/[A-Za-z]/g) || []).length < 3);
+
+/** A journal's citation line: shouted, or carrying a year and a page range. */
+const isCitationLine = (b) =>
+  b.length < 90 &&
+  ((allCaps(b) && /\d/.test(b)) ||
+    (/\b(19|20)\d{2}\b/.test(b) && /\d+\s*[–—-]\s*\d+/.test(b)));
+
+/** Two to four capitalised words, no sentence in sight - somebody's name. */
+const isName = (b) =>
+  b.length < 60 && /^[A-Z][\p{L}.'’-]*(\s+[A-Z][\p{L}.'’-]*\.?){1,3}$/u.test(b);
 
 const isShort = (s, n) => s.length <= n;
 const ends = (s) => /[.!?:;,]$/.test(s);
@@ -249,6 +285,10 @@ function parseArticle(text, fromName) {
     const b = blocks[i];
     if (b.length > 200) break;
 
+    /* "BEHAVIORAL AND BRAIN SCIENCES (2008) 31, 241-260" is the journal's
+       own citation line, not the article's title. */
+    if (!article.title && isCitationLine(b)) continue;
+
     const by = b.match(/^by[\s:]+(.{2,80})$/i);
     if (by && !article.byline) {
       /* OCR often runs the byline and the date together on one line. */
@@ -269,13 +309,20 @@ function parseArticle(text, fromName) {
       article.published = b.replace(/^[-–—|\s]+|[-–—|\s]+$/g, "");
       continue;
     }
+    /* An academic paper prints its author's name with no "By" in front. */
+    if (article.title && !article.byline && isName(b)) {
+      article.byline = b;
+      continue;
+    }
     break;
   }
 
   for (const b of blocks.slice(i)) {
     if (isJunk(b)) continue;
     const wordsIn = b.split(" ").length;
-    const heading = isShort(b, 70) && !ends(b) && /^[A-Z]/.test(b) && wordsIn >= 2 && wordsIn <= 9;
+    /* "3. Method" and "References" are headings as much as "The vote" is. */
+    const heading =
+      isShort(b, 70) && !ends(b) && /^(\d{1,2}[.)]\s+)?[A-Z]/.test(b) && wordsIn >= 1 && wordsIn <= 9;
     article.body.push({
       type: heading ? "heading" : "paragraph",
       text: heading && allCaps(b) ? titleCase(b) : b,
@@ -531,7 +578,7 @@ function inboxPdfs() {
 
 function main() {
   const args = process.argv.slice(2);
-  const forceOcr = args.includes("--force-ocr");
+  const useTextLayer = args.includes("--text-layer");
 
   if (args.includes("--index")) {
     const entries = writeIndex(readIndex());
@@ -572,7 +619,7 @@ function main() {
 
     let article, how;
     try {
-      const read = readPdf(file, forceOcr);
+      const read = readPdf(file, useTextLayer);
       how = read.how;
       article = parseArticle(read.text, name.replace(/\.pdf$/i, ""));
       if (!article.title || !article.body.length) throw new Error("no article text came out");

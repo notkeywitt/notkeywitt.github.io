@@ -29,15 +29,27 @@ publication is never guessed — only the filename supplies it.
 
 ## What it will and will not do
 
-- Tesseract does the reading. A clean 300dpi scan comes out near-perfect. Faint
-  or skewed newsprint comes out with errors, and nothing downstream fixes them.
-- A PDF that already has a text layer skips OCR entirely.
-- It finds paragraphs and subheads. It does not find captions or pull quotes.
-- Page numbers, running heads and jump lines are dropped.
+- Tesseract does the reading, always — even when the PDF carries its own text
+  layer. That is deliberate. A text layer records the order the typesetter
+  *wrote* the text, which on a two-column journal page is not the order you
+  *read* it; `pdftotext` can hand back section headings pages away from their
+  sections. Tesseract works from the image, sees two columns, and reads down
+  one then the other. `--text-layer` opts back into the shortcut when you know
+  a PDF is single-column and want the seconds back.
+- A clean 300dpi scan comes out near-perfect. Faint or skewed newsprint comes
+  out with errors, and nothing downstream fixes them.
+- It finds paragraphs, subheads and numbered section headings. It does not find
+  captions or pull quotes.
+- Page numbers, jump lines and running heads are dropped — a running head only
+  once it has appeared on two pages, so a two-page PDF keeps one.
+- Journal papers: the citation line, the title and the author are read off the
+  first page. A **footnote is left where it fell**, which on an academic page
+  means inside the paragraph above it. The affiliation and the abstract stay in
+  as ordinary paragraphs.
 - Text only. Photographs are not pulled out; every page links its original PDF.
 - Article pages carry `noindex`, so search engines skip them.
-- The output is a plain HTML file in this repo. If a heading came out wrong,
-  edit the file.
+- The output is a plain HTML file in this repo. If something came out wrong,
+  edit the file — that is the intended fix, not a better guess.
 
 The whole job is `scripts/article.mjs`. The trigger is
 `.github/workflows/article.yml`.
