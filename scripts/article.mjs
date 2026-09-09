@@ -79,27 +79,70 @@ const words = (s) => (String(s).match(/[A-Za-z]{2,}/g) || []).length;
  * On a clean single-column PDF the two agree word for word, which is what
  * --text-layer is for when you want the seconds back.
  */
-function readPdf(file, useTextLayer) {
+function readPdf(file, useTextLayer, range) {
   if (useTextLayer) {
-    const direct = run("pdftotext", ["-q", "-eol", "unix", file, "-"]);
+    const span = range ? ["-f", String(range[0]), "-l", String(range[1])] : [];
+    const direct = run("pdftotext", ["-q", "-eol", "unix", ...span, file, "-"]);
     if (words(direct) >= TEXT_LAYER_MIN_WORDS) return { text: direct, how: "text layer" };
   }
 
+  const total = pageCount(file);
+  const first = range ? Math.max(1, range[0]) : 1;
+  const count = range ? Math.min(total, range[1]) : total;
+  if (first > count) throw new Error(`pages ${first}-${count} are not in a ${total}-page pdf`);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "article-"));
   try {
-    run("pdftoppm", ["-r", String(DPI), "-gray", "-png", file, path.join(dir, "p")]);
-    const pages = fs
-      .readdirSync(dir)
-      .filter((f) => f.endsWith(".png"))
-      .sort();
-    if (!pages.length) throw new Error("pdftoppm produced no pages");
-    const text = pages
-      .map((p) => run("tesseract", [path.join(dir, p), "-", "-l", "eng"]))
-      .join("\n\f\n");
-    return { text, how: `ocr, ${pages.length} page${pages.length === 1 ? "" : "s"}` };
+    const out = [];
+    /* One page at a time. A 70-page paper rendered all at once is half a
+       gigabyte of PNG, and a CI runner's disk is not that generous. */
+    for (let n = first; n <= count; n++) {
+      run("pdftoppm", [
+        "-r", String(DPI), "-gray", "-png",
+        "-f", String(n), "-l", String(n),
+        file, path.join(dir, "p"),
+      ]);
+      const png = fs.readdirSync(dir).find((f) => f.endsWith(".png"));
+      if (!png) continue;
+      out.push(run("tesseract", [path.join(dir, png), "-", "-l", "eng"]));
+      fs.unlinkSync(path.join(dir, png));
+      if (count - first > 8 && (n - first + 1) % 10 === 0)
+        console.log(`  page ${n} of ${count} ...`);
+    }
+    if (!out.length) throw new Error("pdftoppm produced no pages");
+    return { text: out.join("\n\f\n"), how: `ocr, ${out.length} page${out.length === 1 ? "" : "s"}` };
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+}
+
+/**
+ * A PDF made by a publisher usually carries the real title and authors in its
+ * catalogue, which beats anything read off the page. Producers also write
+ * junk there - a source filename, a Word document name - so it is screened.
+ */
+function pdfMeta(file) {
+  const info = run("pdfinfo", [file]);
+  const field = (k) => (info.match(new RegExp(`^${k}:\\s+(.+)$`, "m")) || [, ""])[1].trim();
+  const junk = (v) =>
+    !v ||
+    v.length > 300 ||
+    /\.(pdf|docx?|qxd|indd|tex|rtf)\s*$/i.test(v) ||
+    /^(microsoft word|untitled|document\d*|print(ed)?job)/i.test(v);
+  const title = field("Title");
+  const author = field("Author");
+  const subject = field("Subject");
+  return {
+    title: junk(title) ? "" : title,
+    byline: junk(author) ? "" : author,
+    publication: junk(subject) ? "" : subject,
+  };
+}
+
+/** pdfinfo ships with poppler-utils, same package as pdftoppm. */
+function pageCount(file) {
+  const m = run("pdfinfo", [file]).match(/^Pages:\s+(\d+)/m);
+  if (!m) throw new Error("could not read the page count");
+  return Number(m[1]);
 }
 
 /* ------------------------------------------------------------------ *
@@ -248,10 +291,18 @@ function mergeSplitParagraphs(blocks) {
 const isJunk = (b) =>
   b.length < 20 && (/[^\w\s.,'"‘’“”:;!?()\[\]&%$#@/-]/.test(b) || (b.match(/[A-Za-z]/g) || []).length < 3);
 
+/**
+ * A journal folio - "Behavioral and Brain Sciences (2008) 31:5 525" - is the
+ * page's own label, whether it sits at the top or the foot. It is furniture
+ * wherever it lands, so this runs over the body too, not just the first page.
+ */
+const isFolio = (b) => b.length < 80 && /\((19|20)\d{2}\)/.test(b) && /\d{1,4}$/.test(b);
+
 /** A journal's citation line: shouted, or carrying a year and a page range. */
 const isCitationLine = (b) =>
   b.length < 90 &&
-  ((allCaps(b) && /\d/.test(b)) ||
+  (isFolio(b) ||
+    (allCaps(b) && /\d/.test(b)) ||
     (/\b(19|20)\d{2}\b/.test(b) && /\d+\s*[–—-]\s*\d+/.test(b)));
 
 /** Two to four capitalised words, no sentence in sight - somebody's name. */
@@ -274,7 +325,7 @@ const titleCase = (s) =>
  * a wrong heading is easy to skim past, but body text misfiled as a caption
  * disappears into grey. Anything it cannot place stays a paragraph.
  */
-function parseArticle(text, fromName) {
+function parseArticle(text, fromName, meta = {}) {
   const blocks = mergeSplitParagraphs(blocksOf(text));
   const article = { title: "", subtitle: "", byline: "", publication: "", published: "", body: [] };
 
@@ -318,7 +369,7 @@ function parseArticle(text, fromName) {
   }
 
   for (const b of blocks.slice(i)) {
-    if (isJunk(b)) continue;
+    if (isJunk(b) || isFolio(b)) continue;
     const wordsIn = b.split(" ").length;
     /* "3. Method" and "References" are headings as much as "The vote" is. */
     const heading =
@@ -334,7 +385,10 @@ function parseArticle(text, fromName) {
   if (allCaps(article.title)) article.title = titleCase(article.title);
   if (allCaps(article.byline)) article.byline = titleCase(article.byline);
 
-  /* The filename is the one thing a person controls, so it wins. */
+  /* The publisher's own catalogue entry beats a guess read off the page. */
+  for (const k of ["title", "byline", "publication"]) if (meta[k]) article[k] = meta[k];
+
+  /* The filename is the one thing a person controls, so it wins outright. */
   const named = fromName.split(" -- ").map((s) => s.trim());
   if (named.length > 1 || !article.title) {
     const [title, byline, publication, published] = named;
@@ -567,6 +621,14 @@ function writeIndex(entries) {
  * main
  * ------------------------------------------------------------------ */
 
+/** "an issue [36-37].pdf" reads pages 36 to 37 and is titled "an issue". */
+function pagesFromName(base) {
+  const m = base.match(/\s*\[(\d{1,4})(?:\s*[-–]\s*(\d{1,4}))?\]\s*$/);
+  if (!m) return { name: base, range: null };
+  const from = Number(m[1]);
+  return { name: base.slice(0, m.index).trim(), range: [from, Number(m[2] || m[1])] };
+}
+
 function inboxPdfs() {
   if (!fs.existsSync(INBOX)) return [];
   return fs
@@ -579,6 +641,10 @@ function inboxPdfs() {
 function main() {
   const args = process.argv.slice(2);
   const useTextLayer = args.includes("--text-layer");
+  const flagPages = (args.find((a) => a.startsWith("--pages=")) || "").slice(8);
+  const flagRange = flagPages
+    ? [Number(flagPages.split("-")[0]), Number(flagPages.split("-")[1] || flagPages.split("-")[0])]
+    : null;
 
   if (args.includes("--index")) {
     const entries = writeIndex(readIndex());
@@ -593,7 +659,7 @@ function main() {
     return;
   }
 
-  for (const tool of ["pdftotext", "pdftoppm", "tesseract"]) {
+  for (const tool of ["pdftotext", "pdftoppm", "pdfinfo", "tesseract"]) {
     if (!have(tool)) {
       console.error(
         `${tool} is not installed.\n` +
@@ -618,10 +684,12 @@ function main() {
     console.log(`reading ${name} ...`);
 
     let article, how;
+    const { name: stem, range: nameRange } = pagesFromName(name.replace(/\.pdf$/i, ""));
+    const range = flagRange || nameRange;
     try {
-      const read = readPdf(file, useTextLayer);
-      how = read.how;
-      article = parseArticle(read.text, name.replace(/\.pdf$/i, ""));
+      const read = readPdf(file, useTextLayer, range);
+      how = range ? `${read.how} of ${pageCount(file)}` : read.how;
+      article = parseArticle(read.text, stem, pdfMeta(file));
       if (!article.title || !article.body.length) throw new Error("no article text came out");
     } catch (err) {
       failed.push(`${name}: ${err.message}`);

@@ -14,18 +14,33 @@ Three ways to drop one in:
 - **By hand** — `node scripts/article.mjs` from the repo root does the same
   work locally. It needs `brew install tesseract poppler` once.
 
-## Name the file and you get the details right
+## Pulling one article out of a big PDF
 
-The reader guesses the headline, the byline and the date from the page. It is
-usually right and sometimes not. Anything you put in the filename beats the
-guess:
+A journal PDF is often the whole issue. Put the pages you want in brackets at
+the end of the filename:
 
 ```
-The Bridge That Ate a Town's Budget -- Ada Marsh -- Islands Sounder -- March 4, 1987.pdf
+bbs issue [36-37].pdf
 ```
 
-Split on ` -- `, in that order, and you can stop after any part. The
-publication is never guessed — only the filename supplies it.
+Only those pages are read. It is also much faster — 70 pages takes eight
+minutes, two takes fifteen seconds. `--pages=36-37` does the same from the
+command line.
+
+A page range cannot cut mid-page, so where two articles share a page you will
+get a few paragraphs of the neighbour. Delete them from the HTML.
+
+## Where the title and byline come from
+
+Three sources, in this order — the first one that has an answer wins:
+
+1. **The filename**, split on ` -- `:
+   `The Bridge That Ate a Town's Budget -- Ada Marsh -- Islands Sounder -- March 4, 1987.pdf`
+   Title, byline, publication, date. Stop after any part.
+2. **The PDF's own catalogue.** A publisher's PDF usually carries the exact
+   title and authors internally. This is where a journal paper gets it right
+   with no help from you.
+3. **The page itself**, guessed from shape. Fine for a newspaper clipping.
 
 ## What it will and will not do
 
