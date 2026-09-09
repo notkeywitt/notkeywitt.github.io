@@ -180,6 +180,10 @@ li > img {
 	text-transform: lowercase;
 }
 
+#floor a + a {
+	margin-left: 3vw;
+}
+
 #floor a:hover {
 	color: #8db6a7b6;
 	cursor: pointer;

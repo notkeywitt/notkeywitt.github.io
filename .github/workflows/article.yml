@@ -1,0 +1,50 @@
+name: article
+
+# Drop a PDF in inbox/ and this turns it into a page under articles/.
+#
+# No loop risk: a push made with the built-in GITHUB_TOKEN does not start
+# another workflow run, so the commit that empties inbox/ stays quiet.
+
+on:
+  push:
+    paths:
+      - "inbox/**.pdf"
+      - "inbox/**.PDF"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: article
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: install
+        run: npm install --prefix scripts --no-audit --no-fund
+
+      - name: read the pdfs
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/article.mjs
+
+      - name: publish
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "nothing changed"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add articles inbox
+          git commit -m "add $(git diff --cached --name-only --diff-filter=A -- 'articles/*.html' | wc -l | tr -d ' ') article(s) from inbox"
+          git push
