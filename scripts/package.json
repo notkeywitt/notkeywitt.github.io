@@ -1,9 +1,0 @@
-{
-  "name": "keillorwitt-scripts",
-  "private": true,
-  "type": "module",
-  "description": "Build tooling for keillorwitt.com. Not part of the published site.",
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.122.0"
-  }
-}

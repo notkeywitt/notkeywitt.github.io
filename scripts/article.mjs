@@ -1,23 +1,35 @@
 /**
  * article.mjs - turn a PDF of an article into a page on this site.
  *
- * Drop a PDF in inbox/. This reads it, hands it to Claude, and writes
+ * Drop a PDF in inbox/. This OCRs it, works out its shape, and writes
  * articles/<slug>.html plus a rebuilt articles/index.html. The PDF itself
  * moves to articles/pdf/ so the page can link back to the original.
  *
- * There is no separate OCR step. Claude reads the PDF directly as a
- * `document` block, scanned or not, and returns the article as structured
- * blocks. This file renders those blocks to HTML - the model never emits
- * markup, so nothing it returns can inject anything into the page.
+ * Two outside programs do the reading, both free and offline:
+ *   pdftotext  (poppler-utils)  - pulls the text layer if the PDF has one
+ *   pdftoppm + tesseract        - OCRs the pages when it does not
+ *
+ * Everything after that is heuristics in this file. OCR returns a wall of
+ * text; it has no idea what a headline is. The rules below guess, and they
+ * guess wrong sometimes - which is what the filename convention is for:
+ *
+ *   The Bridge That Ate a Town's Budget -- Ada Marsh -- Islands Sounder -- March 4, 1987.pdf
+ *
+ * Anything in the filename, split on " -- ", beats the guess. The order is
+ * title, byline, publication, date, and you can stop after any of them.
  *
  *   node scripts/article.mjs                 process every PDF in inbox/
  *   node scripts/article.mjs some/file.pdf   process one file, anywhere
+ *   node scripts/article.mjs --force-ocr     ignore any text layer, always OCR
  *   node scripts/article.mjs --index         rebuild the list page only
  *
- * Needs ANTHROPIC_API_KEY in the environment (a repo secret in CI).
+ * Local setup: brew install tesseract poppler          (macOS)
+ *              apt-get install tesseract-ocr poppler-utils
  */
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -26,131 +38,265 @@ const OUT = path.join(ROOT, "articles");
 const PDFS = path.join(OUT, "pdf");
 const INDEX = path.join(OUT, "articles.json");
 
-/** Override to trade cost for depth. Opus 5 reads faint scans best. */
-const MODEL = process.env.ARTICLE_MODEL?.trim() || "claude-opus-5";
-
-/** The API caps a request at 32MB, and base64 adds a third. */
-const MAX_PDF_BYTES = 22 * 1024 * 1024;
+/** 300 is where tesseract reads printed text best. Below 200 it degrades fast. */
+const DPI = 300;
+/** Fewer words than this from the text layer means the PDF is a scan. */
+const TEXT_LAYER_MIN_WORDS = 30;
 
 /* ------------------------------------------------------------------ *
- * the one model call
+ * reading the pdf
  * ------------------------------------------------------------------ */
 
-/** Every field is required so the model must decide; absent means "" or []. */
-const SCHEMA = {
-  type: "object",
-  properties: {
-    title: { type: "string", description: "The article's headline." },
-    subtitle: { type: "string", description: "Standfirst or deck. Empty string if none." },
-    byline: { type: "string", description: "Author, as printed, without 'By'. Empty string if none." },
-    publication: { type: "string", description: "Where it ran. Empty string if not printed." },
-    published: { type: "string", description: "Publication date as printed. Empty string if none." },
-    body: {
-      type: "array",
-      description: "The article text in reading order.",
-      items: {
-        type: "object",
-        properties: {
-          type: {
-            type: "string",
-            enum: ["paragraph", "heading", "quote", "list", "caption"],
-          },
-          text: {
-            type: "string",
-            description: "The block's text. Empty string for a list.",
-          },
-          items: {
-            type: "array",
-            items: { type: "string" },
-            description: "The entries of a list block. Empty array otherwise.",
-          },
-        },
-        required: ["type", "text", "items"],
-        additionalProperties: false,
-      },
-    },
-  },
-  required: ["title", "subtitle", "byline", "publication", "published", "body"],
-  additionalProperties: false,
-};
+function run(cmd, args) {
+  return execFileSync(cmd, args, {
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+}
 
-const SYSTEM = `You transcribe scanned articles into structured text.
+function have(cmd) {
+  try {
+    execFileSync("which", [cmd], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-You are reading a PDF of a printed article. Return the article's own text and
-nothing else.
+const words = (s) => (String(s).match(/[A-Za-z]{2,}/g) || []).length;
 
-Rules:
-- Transcribe. Do not summarize, shorten, paraphrase or rewrite. Every sentence
-  the article prints belongs in the body.
-- Do not invent. If a byline, date or publication is not printed, return an
-  empty string for it. Never guess one.
-- Correct only unambiguous scanning errors: a broken ligature, a word split
-  across a line break, an "rn" read as "m". Keep the author's spelling,
-  punctuation, capitalisation and paragraph breaks.
-- Drop page furniture: page numbers, running heads, mastheads, advertisements,
-  subscription boxes, and any neighbouring article that is not this one.
-- A pull quote that repeats body text is furniture. Drop it. A block quotation
-  the article sets apart is a "quote" block.
-- Photo and figure captions are "caption" blocks, placed where they appear.
-- A section subhead within the article is a "heading" block. The article's own
-  headline is the title, not a heading block.
-- If the PDF holds several articles, transcribe the longest one.`;
+/**
+ * Returns { text, how }. Pages are separated by a form feed, which is what
+ * the running-head rule below keys off.
+ */
+function readPdf(file, forceOcr) {
+  if (!forceOcr) {
+    const direct = run("pdftotext", ["-q", "-eol", "unix", file, "-"]);
+    if (words(direct) >= TEXT_LAYER_MIN_WORDS) return { text: direct, how: "text layer" };
+  }
 
-async function extract(client, pdfPath) {
-  const bytes = fs.readFileSync(pdfPath);
-  if (bytes.length > MAX_PDF_BYTES) {
-    throw new Error(
-      `${path.basename(pdfPath)} is ${(bytes.length / 1e6).toFixed(1)}MB. ` +
-        `The API takes about ${(MAX_PDF_BYTES / 1e6).toFixed(0)}MB - split it first.`,
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "article-"));
+  try {
+    run("pdftoppm", ["-r", String(DPI), "-gray", "-png", file, path.join(dir, "p")]);
+    const pages = fs
+      .readdirSync(dir)
+      .filter((f) => f.endsWith(".png"))
+      .sort();
+    if (!pages.length) throw new Error("pdftoppm produced no pages");
+    const text = pages
+      .map((p) => run("tesseract", [path.join(dir, p), "-", "-l", "eng"]))
+      .join("\n\f\n");
+    return { text, how: `ocr, ${pages.length} page${pages.length === 1 ? "" : "s"}` };
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * turning a wall of text into an article
+ * ------------------------------------------------------------------ */
+
+const MONTHS =
+  "january|february|march|april|may|june|july|august|september|october|november|december" +
+  "|jan|feb|mar|apr|jun|jul|aug|sept|sep|oct|nov|dec";
+
+const looksLikeDate = (s) =>
+  new RegExp(`\\b(${MONTHS})\\b[^\\n]{0,12}\\b(1[6-9]|20)\\d{2}\\b`, "i").test(s) ||
+  /^\s*(1[6-9]|20)\d{2}\s*$/.test(s) ||
+  /^\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s*$/.test(s);
+
+/** A page number, a rule of dashes, a jump line - not the article. */
+const isFurniture = (line) =>
+  /^\s*[-–—|]*\s*(page\s*)?\d{1,4}\s*[-–—|]*\s*$/i.test(line) ||
+  /^[-–—_=•·.\s]+$/.test(line) ||
+  /^\s*\(?(continued|cont'd|see)\b.{0,40}\b(page|next)\b.{0,12}$/i.test(line);
+
+/**
+ * Lines that repeat on two or more pages are the masthead or the running
+ * head, wherever they sit on the page. One pass over the pages finds them.
+ */
+function repeatedLines(pages) {
+  if (pages.length < 2) return new Set();
+  const seen = new Map();
+  for (const page of pages) {
+    const unique = new Set(
+      page
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l && l.length < 60),
     );
+    for (const l of unique) seen.set(l, (seen.get(l) || 0) + 1);
+  }
+  const out = new Set();
+  for (const [line, n] of seen) if (n >= 2) out.add(line);
+  return out;
+}
+
+/**
+ * Both readers de-wrap as they go, so a "line" here is a run of text, not a
+ * typeset line, and a blank line between paragraphs is not something either
+ * one reliably emits. These four signals find the breaks instead:
+ *
+ *   a closed sentence followed by a capital   - one paragraph ends, one starts
+ *   a short run with no punctuation, then a
+ *     full-width run                          - a subhead above its section
+ *   a line starting "By "                     - the byline
+ *   caps giving way to mixed case             - the headline ending
+ *
+ * A false break costs a paragraph mark. A missed one welds a subhead into the
+ * body, so where the two are close this leans towards breaking.
+ */
+const DEWRAPPED = 100;
+function chunk(lines) {
+  const groups = [[]];
+  for (const line of lines) {
+    const g = groups[groups.length - 1];
+    const prev = g[g.length - 1];
+    const breaks =
+      prev &&
+      ((/[.!?]["'”’)]?$/.test(prev) && /^["'“‘]?[A-Z]/.test(line)) ||
+        (prev.length < 70 && !/[.!?,;:]$/.test(prev) && line.length >= DEWRAPPED) ||
+        /^by[\s:]/i.test(line) ||
+        (allCaps(prev) && !allCaps(line)));
+    if (breaks) groups.push([line]);
+    else g.push(line);
+  }
+  return groups.filter((g) => g.length);
+}
+
+/** Blocks of lines, blank-line separated, with page furniture already gone. */
+function blocksOf(text) {
+  const pages = text.split(/\f/);
+  const repeated = repeatedLines(pages);
+  const blocks = [];
+
+  for (const page of pages) {
+    let current = [];
+    const flush = () => {
+      if (current.length) for (const run of chunk(current)) blocks.push(run);
+      current = [];
+    };
+    for (const raw of page.split("\n")) {
+      const trimmed = raw.trim();
+      if (!trimmed) {
+        flush();
+        continue;
+      }
+      if (isFurniture(trimmed) || repeated.has(trimmed)) continue;
+      current.push(trimmed);
+    }
+    flush();
   }
 
-  /* Streaming, because a long article can run past the SDK's HTTP timeout at
-     this max_tokens. finalMessage() waits for the whole thing anyway. */
-  const res = await client.beta.messages
-    .stream({
-      model: MODEL,
-      max_tokens: 64000,
-      /* Route around a safety refusal instead of failing the run. */
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      thinking: { type: "adaptive" },
-      system: SYSTEM,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "document",
-              source: {
-                type: "base64",
-                media_type: "application/pdf",
-                data: bytes.toString("base64"),
-              },
-            },
-            { type: "text", text: "Transcribe this article." },
-          ],
-        },
-      ],
-      output_config: { format: { type: "json_schema", schema: SCHEMA } },
-    })
-    .finalMessage();
+  /* Join each block's lines into one string, healing words the typesetter
+     broke across a line: "bud-" + "get" is one word, "well-" + "known" two. */
+  return blocks
+    .map((lines) =>
+      lines
+        .reduce((acc, line) => {
+          if (!acc) return line;
+          const hyphenated = /[a-z]-$/.test(acc) && /^[a-z]/.test(line);
+          return hyphenated ? acc.slice(0, -1) + line : acc + " " + line;
+        }, "")
+        .replace(/\s+/g, " ")
+        .trim(),
+    )
+    .filter(Boolean);
+}
 
-  if (res.stop_reason === "refusal") {
-    throw new Error(`the model declined this document (${res.stop_details?.category ?? "no category"})`);
+/** A paragraph cut in half by a page break, rejoined with its other half. */
+function mergeSplitParagraphs(blocks) {
+  const out = [];
+  for (const b of blocks) {
+    const prev = out[out.length - 1];
+    const runsOn = prev && prev.length > 60 && !/[.!?"'”’)]$/.test(prev) && /^[a-z0-9,;]/.test(b);
+    if (runsOn) out[out.length - 1] = prev + " " + b;
+    else out.push(b);
   }
-  if (res.stop_reason === "max_tokens") {
-    throw new Error("the article ran past max_tokens - it came back truncated");
+  return out;
+}
+
+/** OCR scrapes stray marks off the page edge. A short block carrying a
+ *  character no printed sentence uses is one of those, not a sentence. */
+const isJunk = (b) =>
+  b.length < 20 && (/[^\w\s.,'"‘’“”:;!?()\[\]&%$#@/-]/.test(b) || (b.match(/[A-Za-z]/g) || []).length < 3);
+
+const isShort = (s, n) => s.length <= n;
+const ends = (s) => /[.!?:;,]$/.test(s);
+const allCaps = (s) => s === s.toUpperCase() && /[A-Z]{3}/.test(s);
+
+const SMALL = /\s(a|an|the|and|or|but|of|in|on|at|to|for|from|by|with|as)\b/gi;
+const titleCase = (s) =>
+  s
+    .toLowerCase()
+    .replace(/(^|[\s(“"-])([a-z])/g, (m, pre, ch) => pre + ch.toUpperCase())
+    .replace(SMALL, (w) => w.toLowerCase());
+
+/**
+ * Reads the blocks and decides what each one is. Deliberately conservative:
+ * a wrong heading is easy to skim past, but body text misfiled as a caption
+ * disappears into grey. Anything it cannot place stays a paragraph.
+ */
+function parseArticle(text, fromName) {
+  const blocks = mergeSplitParagraphs(blocksOf(text));
+  const article = { title: "", subtitle: "", byline: "", publication: "", published: "", body: [] };
+
+  /* The head of an article - title, byline, date - sits in the first few
+     short blocks, before the first real paragraph. */
+  let i = 0;
+  for (const HEAD = 6; i < blocks.length && i < HEAD; i++) {
+    const b = blocks[i];
+    if (b.length > 200) break;
+
+    const by = b.match(/^by[\s:]+(.{2,80})$/i);
+    if (by && !article.byline) {
+      /* OCR often runs the byline and the date together on one line. */
+      let who = by[1].trim();
+      const tail = who.match(new RegExp(`\\s+((?:${MONTHS})\\b.*)$`, "i"));
+      if (tail && looksLikeDate(tail[1])) {
+        article.published = tail[1].replace(/[,.]$/, "").trim();
+        who = who.slice(0, tail.index).trim();
+      }
+      article.byline = who.replace(/[,.]$/, "").trim();
+      continue;
+    }
+    if (!article.title && isShort(b, 140) && !ends(b)) {
+      article.title = b;
+      continue;
+    }
+    if (!article.published && isShort(b, 60) && looksLikeDate(b)) {
+      article.published = b.replace(/^[-–—|\s]+|[-–—|\s]+$/g, "");
+      continue;
+    }
+    break;
   }
 
-  const text = res.content
-    .filter((b) => b.type === "text")
-    .map((b) => b.text)
-    .join("");
-  const article = JSON.parse(text);
-  if (!article.title || !Array.isArray(article.body) || !article.body.length) {
-    throw new Error("the model found no article in this PDF");
+  for (const b of blocks.slice(i)) {
+    if (isJunk(b)) continue;
+    const wordsIn = b.split(" ").length;
+    const heading = isShort(b, 70) && !ends(b) && /^[A-Z]/.test(b) && wordsIn >= 2 && wordsIn <= 9;
+    article.body.push({
+      type: heading ? "heading" : "paragraph",
+      text: heading && allCaps(b) ? titleCase(b) : b,
+      items: [],
+    });
   }
+
+  /* A headline set in caps reads as shouting once it is off the page. */
+  if (allCaps(article.title)) article.title = titleCase(article.title);
+  if (allCaps(article.byline)) article.byline = titleCase(article.byline);
+
+  /* The filename is the one thing a person controls, so it wins. */
+  const named = fromName.split(" -- ").map((s) => s.trim());
+  if (named.length > 1 || !article.title) {
+    const [title, byline, publication, published] = named;
+    if (title) article.title = title;
+    if (byline) article.byline = byline;
+    if (publication) article.publication = publication;
+    if (published) article.published = published;
+  }
+
   return article;
 }
 
@@ -383,8 +529,9 @@ function inboxPdfs() {
     .map((f) => path.join(INBOX, f));
 }
 
-async function main() {
+function main() {
   const args = process.argv.slice(2);
+  const forceOcr = args.includes("--force-ocr");
 
   if (args.includes("--index")) {
     const entries = writeIndex(readIndex());
@@ -392,19 +539,23 @@ async function main() {
     return;
   }
 
-  const files = args.length ? args.map((f) => path.resolve(f)) : inboxPdfs();
+  const named = args.filter((a) => !a.startsWith("--"));
+  const files = named.length ? named.map((f) => path.resolve(f)) : inboxPdfs();
   if (!files.length) {
     console.log("inbox is empty - nothing to do");
     return;
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("ANTHROPIC_API_KEY is not set");
-    process.exit(1);
+  for (const tool of ["pdftotext", "pdftoppm", "tesseract"]) {
+    if (!have(tool)) {
+      console.error(
+        `${tool} is not installed.\n` +
+          "  macOS: brew install tesseract poppler\n" +
+          "  linux: apt-get install tesseract-ocr poppler-utils",
+      );
+      process.exit(1);
+    }
   }
-  /* Imported here, not at the top, so --index runs with nothing installed. */
-  const { default: Anthropic } = await import("@anthropic-ai/sdk");
-  const client = new Anthropic();
 
   const entries = readIndex();
   const taken = new Set(entries.map((e) => e.slug));
@@ -418,9 +569,13 @@ async function main() {
       continue;
     }
     console.log(`reading ${name} ...`);
-    let article;
+
+    let article, how;
     try {
-      article = await extract(client, file);
+      const read = readPdf(file, forceOcr);
+      how = read.how;
+      article = parseArticle(read.text, name.replace(/\.pdf$/i, ""));
+      if (!article.title || !article.body.length) throw new Error("no article text came out");
     } catch (err) {
       failed.push(`${name}: ${err.message}`);
       console.error(`  failed - ${err.message}`);
@@ -430,10 +585,7 @@ async function main() {
     const slug = uniqueSlug(slugify(article.title), taken);
     taken.add(slug);
 
-    const words = article.body.reduce(
-      (n, b) => n + String(b.text || (b.items || []).join(" ")).split(/\s+/).filter(Boolean).length,
-      0,
-    );
+    const wordCount = article.body.reduce((n, b) => n + words(b.text), 0);
     const entry = {
       slug,
       title: article.title,
@@ -442,7 +594,7 @@ async function main() {
       publication: article.publication || "",
       published: article.published || "",
       added: new Date().toISOString().slice(0, 10),
-      words,
+      words: wordCount,
       pdf: `${slug}.pdf`,
       source: name,
     };
@@ -456,7 +608,7 @@ async function main() {
 
     entries.push(entry);
     made++;
-    console.log(`  -> articles/${slug}.html (${words} words)`);
+    console.log(`  -> articles/${slug}.html (${how}, ${wordCount} words)`);
   }
 
   writeIndex(entries);
@@ -470,7 +622,4 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main();
